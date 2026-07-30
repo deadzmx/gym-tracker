@@ -1,0 +1,51 @@
+# ────────────────────────────────────────────────────────────
+# Development override for docker-compose
+# Usage:  docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#         (or `make dev`)
+#
+# Differences from prod:
+# - Uses `dev` target in both Dockerfiles (tsx watch + vite dev)
+# - Bind-mounts source code for live reload
+# - Exposes both ports 5173 (frontend) + 3001 (backend) directly
+# - Keeps `gym-data` volume so DB persists across restarts
+# ────────────────────────────────────────────────────────────
+
+name: gym-tracker-dev
+
+services:
+  backend:
+    build:
+      target: dev
+    image: gym-backend:dev
+    container_name: gym-backend-dev
+    restart: unless-stopped
+    command: npx tsx watch src/server.ts
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+    volumes:
+      - ./backend/src:/app/src          # hot reload
+      - ./backend/tsconfig.json:/app/tsconfig.json
+      - gym-data:/app/data              # DB persists
+      - /app/node_modules               # don't overwrite
+
+  frontend:
+    build:
+      target: dev
+    image: gym-frontend:dev
+    container_name: gym-frontend-dev
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_BASE: http://localhost:3001
+    volumes:
+      - ./frontend/src:/app/src         # hot reload
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - /app/node_modules               # don't overwrite
+    depends_on:
+      - backend

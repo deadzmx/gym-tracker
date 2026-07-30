@@ -1,0 +1,114 @@
+# ────────────────────────────────────────────────────────────
+# Production docker-compose for gym-tracker
+#
+# Usage:
+#   make up           # start prod stack
+#   make dev          # start dev with hot reload
+#   make test         # run unit tests in container
+#   make e2e          # run E2E tests
+#   make down         # stop
+#   make clean        # stop + remove volumes (DATA LOSS)
+# ────────────────────────────────────────────────────────────
+
+name: gym-tracker
+
+services:
+  # ─── Production backend ───
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: prod
+    image: ghcr.io/deadzmx/gym-tracker-backend:latest
+    container_name: gym-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+    volumes:
+      - gym-data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3001/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - gym-net
+
+  # ─── Production frontend (nginx) ───
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: prod
+    image: ghcr.io/deadzmx/gym-tracker-frontend:latest
+    container_name: gym-frontend
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - gym-net
+
+  # ─── Backend unit tests (profile: test) ───
+  backend-test:
+    profiles: ["test"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: prod
+    command: npx vitest run --reporter=verbose
+    environment:
+      NODE_ENV: test
+    networks:
+      - gym-net
+
+  # ─── Frontend unit tests (profile: test) ───
+  frontend-test:
+    profiles: ["test"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: build
+    command: npm test -- --run
+    environment:
+      NODE_ENV: test
+    networks:
+      - gym-net
+
+  # ─── E2E tests (profile: e2e) ───
+  e2e:
+    profiles: ["e2e"]
+    build:
+      context: ./e2e
+      dockerfile: Dockerfile
+    image: ghcr.io/deadzmx/gym-tracker-e2e:latest
+    depends_on:
+      - backend
+      - frontend
+    environment:
+      BASE_URL: http://frontend
+      API_URL: http://backend:3001
+    networks:
+      - gym-net
+    volumes:
+      - ./e2e/test-results:/app/test-results
+      - ./e2e/playwright-report:/app/playwright-report
+      - ./e2e/screenshots:/app/screenshots
+
+volumes:
+  gym-data:
+    name: gym-data
+
+networks:
+  gym-net:
+    name: gym-net
+    driver: bridge

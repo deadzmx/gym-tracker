@@ -9,7 +9,7 @@
 [![Tests](https://img.shields.io/badge/tests-82_passing-4c1?logo=checkmarx&logoColor=white)](#-测试)
 [![E2E](https://img.shields.io/badge/E2E-Playwright-2EAD33?logo=playwright&logoColor=white)](https://playwright.dev)
 
-> 一套完整自托管的训练日志 + AI 计划推荐 + 移动响应式 + 暗色模式 + 离线缓存 + 月视图日历(可拖拽改日)的 Web 应用。前后端分离,数据存 SQLite,部署零依赖。
+> 一套完整自托管的训练日志 + AI 计划推荐 + 移动响应式 + 暗色模式 + 离线缓存 + 月视图日历(可拖拽改日)的 Web 应用。前后端分离,数据存 SQLite,部署零依赖。**自带 Docker 镜像**,一条命令起服务。
 
 ## ✨ 功能
 
@@ -225,6 +225,7 @@ Epley 公式:`1RM = weight × (1 + reps / 30)`,例:60kg × 8 reps → 60 × 1.26
 
 ## 🧪 测试
 
+### 本地原生(npm)
 ```bash
 # 后端
 cd backend && npm install && npm test
@@ -236,6 +237,15 @@ cd frontend && npm install && npm test
 cd e2e && npm install && npx playwright install chromium && npm test
 ```
 
+### Docker 容器
+```bash
+# 单元测试(后端 + 前端)
+make test
+
+# E2E(需要先 make up 或 make dev)
+make e2e
+```
+
 | 层级 | 数量 | 工具 |
 |---|---|---|
 | 后端 | 34 | vitest + better-sqlite3 |
@@ -244,6 +254,79 @@ cd e2e && npm install && npx playwright install chromium && npm test
 | **合计** | **82** | — |
 
 E2E 覆盖:核心 CRUD、AI 推荐流程、移动端响应式、暗色模式、PR 自动调重量、12 周热力图、Workout 离线缓存、月视图日历、拖拽改日。
+
+## 🐳 Docker 部署
+
+### 快速启动(生产模式)
+```bash
+# 用 Makefile(推荐)
+make up
+
+# 或直接用 docker compose
+docker compose up -d --build
+
+# 浏览器 → http://localhost:8080
+```
+
+### 开发模式(热重载)
+```bash
+make dev
+
+# 代码改了自动重载,数据库持久化在 gym-data volume
+```
+
+### 常用命令
+```bash
+make help         # 查看所有命令
+make build        # 构建镜像
+make up           # 启动生产模式(后台)
+make dev          # 启动开发模式(热重载,前台)
+make logs         # 查看日志
+make down         # 停止
+make clean        # 停止 + 删除 volume(数据会丢!)
+make clean-keep-db # 停止 + 保留数据
+make shell-backend # 进入后端容器
+```
+
+### 架构
+
+| Service | 镜像 | 端口 | 说明 |
+|---|---|---|---|
+| `backend` | `ghcr.io/deadzmx/gym-tracker-backend` | 3001 (内) | Node + Express + SQLite |
+| `frontend` | `ghcr.io/deadzmx/gym-tracker-frontend` | 8080 → 80 | nginx + React 静态文件 + /api 反代 |
+| `e2e` | `ghcr.io/deadzmx/gym-tracker-e2e` | — | Playwright runner(profile: e2e) |
+
+### 数据持久化
+
+SQLite 数据库存放在 named volume `gym-data`:
+- 容器内路径:`/app/data/gym.db`
+- 主机查看:`docker volume inspect gym-data`
+- 备份:停止容器后 `cp $(docker volume inspect gym-data -f '{{ .Mountpoint }}')/gym.db ./backup.db`
+
+### 拉到 GHCR 镜像直接跑(无需 clone 代码)
+
+```bash
+# 最新版
+docker run -d --name gym-backend \
+  -v gym-data:/app/data \
+  -e NODE_ENV=production \
+  ghcr.io/deadzmx/gym-tracker-backend:latest
+
+docker run -d --name gym-frontend \
+  -p 8080:80 \
+  --link gym-backend:backend \
+  ghcr.io/deadzmx/gym-tracker-frontend:latest
+```
+
+### 部署到服务器(纯 docker compose)
+
+```bash
+# 服务器上
+git clone https://github.com/deadzmx/gym-tracker.git
+cd gym-tracker
+docker compose up -d --build
+# 反向代理(nginx / Caddy)指向 8080 即可
+```
 
 ## 📄 License
 

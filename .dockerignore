@@ -1,0 +1,50 @@
+# ────────────────────────────────────────────────────────────
+# Root .dockerignore
+# ────────────────────────────────────────────────────────────
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Build artifacts
+**/node_modules/
+**/dist/
+**/build/
+**/coverage/
+**/.next/
+
+# Data & runtime
+**/data/*.db
+**/data/*.db-shm
+**/data/*.db-wal
+**/data/gym.db*
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Logs & temp
+**/*.log
+**/.tmp
+**/.cache
+
+# Test outputs
+**/test-results/
+**/playwright-report/
+**/screenshots/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Docker files themselves (don't include in builds)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+Makefile
