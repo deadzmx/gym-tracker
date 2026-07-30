@@ -52,7 +52,7 @@ RUN npm run build \
 
 # ─── Prod: combined runtime ───
 # Single node process serves both the API and the static frontend.
-FROM node:${NODE_VERSION}-slim AS prod
+FROM node:${NODE_VERSION} AS prod
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3001
