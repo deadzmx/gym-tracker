@@ -19,7 +19,7 @@ services:
       PORT: 3001
       DB_PATH: /app/backend/data/gym.db
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:3001/api/health > /dev/null || exit 1"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:3001/api/health || exit 1"]
       interval: 2s
       timeout: 3s
       retries: 30
