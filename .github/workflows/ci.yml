@@ -120,7 +120,7 @@ jobs:
         run: docker run --rm gym-frontend:test npm test -- --run
 
   # ─────────────────────────────────────────────────────────
-  # E2E: backend + frontend containers + Playwright container
+  # E2E: use docker compose for proper DNS + networking
   # ─────────────────────────────────────────────────────────
   e2e:
     name: E2E (Playwright)
@@ -134,45 +134,9 @@ jobs:
           docker build -t gym-frontend:test --target prod ./frontend
           docker build -t gym-e2e:test ./e2e
 
-      - name: Create test network
-        run: docker network create gym-test-net || true
-
-      - name: Start backend container
+      - name: Run e2e stack (compose handles DNS + healthchecks)
         run: |
-          docker run -d --name test-backend \
-            --network gym-test-net \
-            -e NODE_ENV=test \
-            -e PORT=3001 \
-            gym-backend:test
-          for i in {1..30}; do
-            if docker exec test-backend wget -q --spider http://localhost:3001/api/health 2>/dev/null; then
-              echo "Backend ready"; break
-            fi
-            sleep 2
-          done
-
-      - name: Start frontend container
-        run: |
-          docker run -d --name test-frontend \
-            --network gym-test-net \
-            gym-frontend:test
-          # Wait for nginx to start (check via wget from inside the network)
-          for i in {1..30}; do
-            if docker run --rm --network gym-test-net alpine wget -q --spider http://test-frontend/ 2>/dev/null; then
-              echo "Frontend ready"; break
-            fi
-            sleep 2
-          done
-
-      - name: Run E2E container
-        run: |
-          docker run --rm --name test-e2e \
-            --network gym-test-net \
-            --ipc=host \
-            -e BASE_URL=http://test-frontend \
-            -e API_URL=http://test-backend:3001 \
-            -v "${{ github.workspace }}/e2e/screenshots:/app/screenshots" \
-            gym-e2e:test
+          docker compose -f docker-compose.ci.yml up --abort-on-container-exit --exit-code-from e2e
 
       - name: Upload screenshots on failure
         if: failure()
@@ -184,6 +148,4 @@ jobs:
 
       - name: Cleanup
         if: always()
-        run: |
-          docker rm -f test-backend test-frontend test-e2e 2>/dev/null || true
-          docker network rm gym-test-net 2>/dev/null || true
+        run: docker compose -f docker-compose.ci.yml down -v 2>/dev/null || true
