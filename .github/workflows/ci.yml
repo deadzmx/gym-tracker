@@ -155,10 +155,10 @@ jobs:
         run: |
           docker run -d --name test-frontend \
             --network gym-test-net \
-            -p 8080:80 \
             gym-frontend:test
+          # Wait for nginx to start (check via wget from inside the network)
           for i in {1..30}; do
-            if curl -s http://localhost:8080/ > /dev/null 2>&1; then
+            if docker run --rm --network gym-test-net alpine wget -q --spider http://test-frontend/ 2>/dev/null; then
               echo "Frontend ready"; break
             fi
             sleep 2
@@ -166,17 +166,9 @@ jobs:
 
       - name: Run E2E container
         run: |
-          # Get container IPs as fallback (Playwright image sometimes has DNS issues)
-          FRONTEND_IP=$(docker inspect test-frontend --format '{{ index .NetworkSettings.Networks "gym-test-net" "IPAddress" }}')
-          BACKEND_IP=$(docker inspect test-backend --format '{{ index .NetworkSettings.Networks "gym-test-net" "IPAddress" }}')
-          echo "test-frontend IP: $FRONTEND_IP"
-          echo "test-backend IP: $BACKEND_IP"
-
           docker run --rm --name test-e2e \
             --network gym-test-net \
             --ipc=host \
-            --add-host="test-frontend:${FRONTEND_IP}" \
-            --add-host="test-backend:${BACKEND_IP}" \
             -e BASE_URL=http://test-frontend \
             -e API_URL=http://test-backend:3001 \
             -v "${{ github.workspace }}/e2e/screenshots:/app/screenshots" \
