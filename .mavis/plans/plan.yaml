@@ -1,0 +1,265 @@
+version: 1
+plan:
+  name: '健身房锻炼计划管理 — 全栈项目'
+  max_concurrency: 3
+  max_consecutive_failures: 2
+  max_cycles: 12
+  auto_reject_retries: 1
+
+tasks:
+  # ====================================================================
+  # Track 1: Backend — Node.js + Express + SQLite + TypeScript
+  # ====================================================================
+  - id: backend-impl
+    title: '后端:数据模型 + REST API + SQLite'
+    assigned_to: Coder
+    verified_by: Verifier
+    timeout_ms: 1800000
+    prompt: |
+      在 `/workspace/gym-tracker/` 目录下完成健身房锻炼计划管理项目的**后端**实现。
+      **必须严格遵循 `/workspace/gym-tracker/docs/design.md` 第 4 节的 API 契约**(端口、路由、请求/响应格式、错误码)。
+      如发现契约需要调整,先在 design.md 里改,再实现 — 改动要在 deliverable.md 里说明。
+
+      ## 范围(必须全部完成)
+      1. **项目骨架**:在 `backend/` 下初始化 npm 项目,使用 TypeScript,生成 `package.json` / `tsconfig.json` / `.gitignore`。
+         - 依赖:`express` `better-sqlite3` `cors` `zod` `dotenv`;devDeps:`typescript` `tsx` `@types/*` `vitest` `supertest`
+         - 脚本:`dev`(tsx watch src/server.ts)、`build`(tsc)、`start`(node dist/server.js)、`test`(vitest run)
+      2. **数据库**:`src/db/connection.ts` 初始化 SQLite(默认路径 `data/gym.db`,可通过 `DB_PATH` 覆盖)。
+         - 启动时自动建表(5 张表:exercises / workout_plans / plan_exercises / workout_sessions / exercise_sets,字段见 design.md 第 3 节)。
+         - **Seed 30+ 常用动作**(杠铃卧推、哑铃飞鸟、深蹲、硬拉、推举、引体、划船、弯举、臂屈伸、腿举、腿屈伸、腿弯举、提踵、平板支撑、卷腹… 涵盖胸/背/腿/肩/臂/核心 6 个分类)。
+      3. **Repository 层**:`src/repositories/` 下为每张表一个文件,封装 SQL,导出 CRUD 函数,使用 better-sqlite3 prepared statements。
+      4. **路由层**:`src/routes/` 下按 design.md 4.1-4.5 实现所有端点。
+         - 使用 zod 校验请求体,失败返 400 + `{ error: { code, message } }`。
+         - 不存在返 404,unique 冲突返 409。
+         - `GET /plans/:id` 要 join 出 plan_exercises + exercise 信息。
+         - `GET /sessions/:id` 要 join 出所有 sets + exercise 信息。
+         - `POST /plans` 接受 `{ ..., exercises: [...] }`,在一个事务里写 plan + plan_exercises。
+         - `PUT /plans/:id` 全量替换 plan_exercises(事务里 delete + insert)。
+         - `POST /sessions/:sessionId/sets` 接受 `{ sets: [...] }` 批量插入。
+         - `GET /stats/summary` 返回 `{ total_sessions, total_volume_kg, current_streak_days, last_7_days_volume: [{date, volume}] }`。
+         - `GET /stats/volume?exercise_id=X&from=&to=` 返回 `[{date, volume, sets_count}]`,按天聚合,空缺天补 0。
+         - `GET /stats/personal-records?exercise_id=X` 返回 `{ max_weight: {value, date}, max_volume: {value, date}, estimated_1rm: {value, date} }`(1RM 用 Epley 公式:weight * (1 + reps/30))。
+      5. **中间件**:`src/middleware/errorHandler.ts` 统一错误处理(必须打 4xx/5xx 区分),`src/middleware/cors.ts` 允许 `http://localhost:5173`。
+      6. **入口**:`src/server.ts` 装配 express、路由、错误处理、CORS,监听 `PORT`(默认 3001)。
+      7. **测试**:`tests/` 下用 Vitest + supertest 覆盖关键端点:
+         - `exercises.test.ts`:GET 列表 + 分类过滤
+         - `plans.test.ts`:POST 创建(含 exercises 数组)→ GET 详情包含 exercises → PUT 全量替换 → DELETE
+         - `sessions.test.ts`:POST 开始 → POST sets 批量 → PATCH 结束 → GET 详情包含 sets
+         - `stats.test.ts`:seed 几次 session 后,/stats/summary 数字正确,/stats/volume 按天聚合正确
+         - **目标:所有测试通过(vitest run 退出码 0)**,覆盖率不限但关键路径必须有。
+      8. **配置文件**:`backend/.env.example` 列出 `PORT=3001` 和 `DB_PATH=./data/gym.db`。
+
+      ## 质量要求
+      - 严格 TypeScript:`tsc --noEmit` 必须无错。
+      - 代码风格统一(用 2 空格缩进、async/await 优先、显式返回类型在导出函数上)。
+      - 不留 TODO 注释,所有路由必须可用。
+      - 不引无关依赖。
+
+      ## 交付
+      在 `/workspace/gym-tracker/backend/deliverable.md` 写明:
+      - 改动文件列表
+      - 如何运行(`cd backend && npm install && npm run dev`)
+      - 所有测试通过(vitest run)的输出
+      - 手工 curl 几个关键端点的命令和响应(至少:GET /exercises、POST /plans、POST /sessions、GET /stats/summary)
+      - 任何契约偏离与原因
+
+      不要等待外部系统,不要做无谓的轮询,完成 deliverable.md 就退出。
+    verify_prompt: |
+      你是 Verifier,对 `/workspace/gym-tracker/backend` 的实现做独立、可执行的验证。**不要只读 diff**。
+
+      ## 必做步骤
+      1. `cd /workspace/gym-tracker/backend && npm install`(允许 5 分钟超时)
+      2. `npx tsc --noEmit` — TypeScript 必须无错
+      3. `npm test` — 所有测试必须通过(逐个记录 PASS/FAIL)
+      4. `npm run dev &`(后台),等待 3 秒,然后**手工 curl** 这些端点,记录真实响应:
+         - `GET /api/exercises` — 至少 30 个,包含胸/背/腿/肩/臂/核心各类
+         - `GET /api/exercises?category=chest` — 只返回 chest
+         - `POST /api/plans` body=设计文档 4.2 的示例 → 201 + 返 plan.id
+         - `GET /api/plans/:id` — 必须包含 exercises 数组
+         - `POST /api/sessions` body=`{plan_id, session_date}` → 201
+         - `POST /api/sessions/:id/sets` body 批量插入 3 组 → 201
+         - `GET /api/sessions/:id` — 必须含 sets
+         - `GET /api/stats/summary` — 必须含 total_sessions, total_volume_kg, current_streak_days
+         - `GET /api/stats/volume?exercise_id=1` — 返回数组
+         - `GET /api/stats/personal-records?exercise_id=1` — 返回三种 PR
+         - **负向测试**:POST /api/plans 给个不存在的 exercise_id → 必须 400/422,不是 500
+         - **负向测试**:GET /api/plans/99999 → 必须 404
+      5. 检查 `data/gym.db` 存在且含 seed 数据
+      6. 杀掉后台进程
+
+      ## PASS 条件
+      - tsc 无错,所有测试通过
+      - 上面所有 curl 都返回合理 JSON(正向 2xx、负向 4xx),无 5xx
+      - /api/stats/summary 数字能对上(自己心算:seed 1 session + 3 sets,total_volume_kg 等于 weight*reps 之和)
+      - 代码无明显错误处理漏洞(裸 try-catch 吞错、console.log 调试代码)
+      - 严格遵守 design.md 的 API 契约(端点、字段、状态码)
+
+      ## FAIL 条件
+      - 任何测试 fail、tsc 报错、关键 curl 5xx、契约偏离
+      - 在 verify report 里精确列出:哪个端点、哪个文件、哪行、期望 vs 实际
+      不要修改 backend 代码,只读、只跑、只报。
+
+  # ====================================================================
+  # Track 2: Frontend — React + Vite + TypeScript + Tailwind
+  # ====================================================================
+  - id: frontend-impl
+    title: '前端:React UI + 路由 + 状态管理'
+    assigned_to: Coder
+    verified_by: Verifier
+    timeout_ms: 1800000
+    prompt: |
+      在 `/workspace/gym-tracker/frontend/` 下完成健身房锻炼计划管理项目的**前端**实现。
+      **API 调用严格遵循 `/workspace/gym-tracker/docs/design.md` 第 4 节的契约**(端点、字段、状态码)。
+      后端可能还没起,前端开发期间用 mock 数据或直接调后端(用 axios 拦截或条件 BASE URL)。
+
+      ## 范围(必须全部完成)
+      1. **项目骨架**:`npm create vite@latest frontend -- --template react-ts`,然后:
+         - 依赖:`react-router-dom` `@tanstack/react-query` `recharts` `axios` `clsx` `date-fns`
+         - devDeps:`tailwindcss` `postcss` `autoprefix` `vitest` `@testing-library/react` `jsdom`
+         - 集成 Tailwind(npx tailwindcss init -p,配置 content)
+         - 脚本:`dev`(vite)、`build`(tsc && vite build)、`preview`、`test`(vitest run)
+         - `VITE_API_BASE` 默认 `http://localhost:3001/api`
+      2. **API 层**:`src/api/client.ts` 封装 axios,baseURL 读 `VITE_API_BASE`,统一错误处理。
+         `src/api/{exercises,plans,sessions,stats}.ts` 各自封装端点(返回 typed promise)。
+      3. **类型**:`src/types/index.ts` 定义 Exercise / WorkoutPlan / PlanExercise / WorkoutSession / ExerciseSet / StatsSummary 等 TS 接口,与 design.md 字段一致(可以手写,也可以与后端共享 schema — 但要落地在 frontend 代码里)。
+      4. **页面**(design.md 第 5 节 7 个页面全部实现):
+         - `/` Dashboard:今日推荐训练(按星期几匹配 plan.day_of_week)、最近 7 天容量柱状图(Recharts)、3 个 PR 卡片
+         - `/plans` 计划列表:卡片网格,显示名称/描述/动作数,按钮"新建/编辑/删除/开始训练"
+         - `/plans/new` 和 `/plans/:id/edit` 表单:可增删动作,每个动作选 exercise_id + 组数 + 次数 + 重量 + 休息
+         - `/plans/:id` 详情:展示计划内容,大按钮"开始训练"
+         - `/exercises` 动作库:表格 + 分类 tab 过滤 + 名称搜索
+         - `/workout` 正在训练:从 plan 开始(用 query string 传 plan_id 或自由训练),实时显示当前动作的目标组数,可加/删组,组间休息计时器(`useEffect + setInterval`),结束按钮调用 PATCH
+         - `/history` 历史列表:时间倒序,每条显示日期/计划/总容量
+         - `/history/:id` 单次训练详情:展示所有组,可编辑每组的 reps/weight
+         - `/stats` 统计:某个动作的容量曲线(Recharts LineChart)+ PR 表
+      5. **通用组件**:`src/components/` 下:
+         - `Button` `Input` `Select` `Card` `Modal` `Tabs` `Empty` `Loading` `Toast`(用纯 React + Tailwind 手写,不要装 shadcn 那种重型)
+         - `Layout`:顶栏 + 主内容区 + 侧边导航
+      6. **状态管理**:用 TanStack Query 做服务端状态(每个端点一个 query key),用 React Router 做路由,本地 UI 状态用 useState。
+      7. **样式**:Tailwind,主色调靛蓝(indigo),暗色模式可不做,但要有现代简洁的观感(留白、圆角、阴影、hover 反馈)。
+      8. **测试**:`tests/` 下:
+         - `api.test.ts`:用 mock 验证 client 的错误处理(404 转成 reject,数据返回)
+         - `components/Button.test.tsx` `components/Card.test.tsx`:渲染 + 交互
+         - `pages/Dashboard.test.tsx`:mock api + 验证图表渲染
+         - **目标:vitest run 全绿**
+
+      ## 质量要求
+      - `tsc --noEmit` 无错
+      - `npm run build` 成功(dist 产物可部署)
+      - 严格遵循 design.md 契约 — 字段名、嵌套结构完全一致
+      - 关键交互(开始训练、加组、结束、保存)有 loading / disabled / 错误提示
+      - 响应式不要求,但桌面 1280px 宽下不能错位
+
+      ## 交付
+      `/workspace/gym-tracker/frontend/deliverable.md`:
+      - 改动文件列表
+      - 启动方式(`cd frontend && npm install && npm run dev`)
+      - `npm run build` 输出
+      - `npm test` 输出
+      - **重要**:列出每个页面,说明它调了哪些端点、对应 design.md 哪一节
+      - 如果后端在跑(看 design.md 端口 3001),手工演示一次:用 curl 喂数据,然后前端页面渲染;不跑就只列行为
+
+      不要等待外部系统,完成 deliverable.md 就退出。
+    verify_prompt: |
+      你是 Verifier,对 `/workspace/gym-tracker/frontend` 做独立验证。**不要只读 diff**。
+
+      ## 必做步骤
+      1. `cd /workspace/gym-tracker/frontend && npm install`(允许 5 分钟)
+      2. `npx tsc --noEmit` — 无错
+      3. `npm test` — 全部通过
+      4. `npm run build` — 成功生成 dist/
+      5. 启动后端如果没跑则跳过;**前端必须能独立 build 成功**
+      6. 检查 `src/pages/` 下确实有 7 个页面文件(对照 design.md 第 5 节)
+      7. 检查 API 调用:grep `axios` 或 fetch,确认所有端点(GET/POST/PUT/PATCH/DELETE exercises, plans, sessions, sets, stats)都有对应调用
+      8. 检查 Recharts 用法:`grep -r "recharts"` 至少在 Dashboard 和 Stats 页有用
+      9. 检查 Tailwind:`tailwind.config.js` 存在,`index.css` 包含 `@tailwind`
+      10. **关键**:随机挑 2 个 API 调用文件,核对字段名是否与 design.md 第 4 节一致(比如 `target_sets` 不能写成 `targetSets`,`plan_exercises` 不能写成 `planExercises`)
+
+      ## PASS 条件
+      - tsc 无错、测试全过、build 成功
+      - 7 个页面都存在且引用了正确端点
+      - 字段命名严格遵循 design.md(snake_case 来自后端,前端 TS 用同样的 snake_case,不强行转 camelCase)
+      - 至少 Dashboard 和 Stats 页用了 Recharts
+      - 没有遗留的 console.log 调试代码
+
+      ## FAIL 条件
+      - 编译错、测试 fail、build 失败
+      - 缺页面、缺关键端点调用、字段名不一致
+      在 verify report 里精确指出:文件、行、问题、修复建议。不要改前端代码。
+
+  # ====================================================================
+  # Gate: E2E Integration — 启动两端 + Playwright 跑全链路
+  # ====================================================================
+  - id: e2e-integration
+    title: 'E2E 集成:全链路验证'
+    assigned_to: Verifier
+    depends_on: [backend-impl, frontend-impl]
+    verified_by: Verifier
+    timeout_ms: 1800000
+    prompt: |
+      你是集成验证者。**前两个任务都通过后,你负责把两端真正跑起来,用 Playwright 端到端验证全链路可用**。
+
+      ## 必做步骤
+      1. `cd /workspace/gym-tracker && npm install --workspaces=false`(根目录不需要 workspace,但要确保 backend 和 frontend 都已 install)
+         - 若 backend 或 frontend 缺 `node_modules`,补 `npm install`
+      2. 在 `e2e/` 下初始化 Playwright:
+         - `npm init -y`,装 `playwright` `concurrently`(或用 shell 后台)
+         - `npx playwright install chromium`(只装 chromium,够用)
+      3. 写根目录 `start.sh`:后台启动 backend(`cd backend && npm run dev &`,PID 记录到 `.backend.pid`)和 frontend(`cd frontend && npm run dev &`,PID 记录到 `.frontend.pid`),等待 5 秒让服务起来。
+         写根目录 `stop.sh`:读 PID 文件 kill 掉。
+         `chmod +x start.sh stop.sh`。
+      4. 跑 `./start.sh`,等 5 秒后用 curl 验:
+         - `curl http://localhost:3001/api/exercises | head -c 200` → 必须有 JSON
+         - `curl http://localhost:5173 | head -c 200` → 必须有 HTML
+      5. 写 `e2e/tests/full-flow.spec.ts`(Playwright),覆盖这个真实用户故事:
+         1. 打开 `http://localhost:5173/`
+         2. 进入 `/exercises`,看到至少 30 个种子动作
+         3. 进入 `/plans`,点击"新建计划",填名称"测试计划",加 2 个动作(用 select 选 exercise),保存
+         4. 回到 `/plans`,看到新建的"测试计划"卡片
+         5. 进入计划详情,点击"开始训练",跳到 `/workout?plan_id=X`
+         6. 在 workout 页面,对第一个动作点"加组"3 次,分别填 reps/weight 并标完成
+         7. 点"结束训练"
+         8. 进入 `/history`,看到刚才那次训练
+         9. 进入 `/stats`,图表正常渲染
+         - **每个关键步骤要 `expect(...).toBeVisible()` 或 toContainText**
+      6. 跑 `npx playwright test`,全部通过(用 chromium,headless)
+      7. `./stop.sh` 关闭两端
+      8. 截图存证:`e2e/screenshots/` 下保存 dashboard.png / plans.png / workout.png(用 Playwright 的 `await page.screenshot()`)
+
+      ## 交付
+      `/workspace/gym-tracker/e2e/deliverable.md`:
+      - start.sh / stop.sh 内容摘要
+      - Playwright 测试通过输出
+      - 截图列表(可只列文件路径)
+      - 任何发现的 bug(前端不能调通后端、字段不一致、UI 错位)
+      - **README.md** 在根目录:写明项目介绍、目录结构、如何启动(start.sh)、如何测试(后端 npm test、前端 npm test、e2e npx playwright test)、常见问题
+
+      完成 deliverable.md 后退出。
+    verify_prompt: |
+      你是终验 Verifier。**独立运行一切,只看结果**。
+
+      ## 必做步骤
+      1. `cd /workspace/gym-tracker`
+      2. 确认 backend 和 frontend 的 `node_modules` 存在,没有就 `npm install`
+      3. 确认 e2e 的 `node_modules` 存在,没有就 `cd e2e && npm install && npx playwright install chromium`
+      4. 跑 `./start.sh`,等 6 秒
+      5. 用 curl 独立验证两端:
+         - `curl -s http://localhost:3001/api/exercises | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d))"` → 必须 ≥ 30
+         - `curl -s http://localhost:3001/api/plans -X POST -H "Content-Type: application/json" -d '{"name":"e2e-test","exercises":[{"exercise_id":1,"order_index":0,"target_sets":3,"target_reps":8,"target_weight":50,"rest_seconds":60}]}'` → 必须 201
+         - `curl -sI http://localhost:5173/` → 必须 200
+      6. `cd e2e && npx playwright test` — **必须全绿**(允许最多 2 分钟超时)
+      7. 检查 `e2e/screenshots/` 下至少有 3 个 png
+      8. 检查根目录有 `README.md` 且含以下章节:项目介绍、目录结构、启动方式、测试方式
+      9. `./stop.sh`
+
+      ## PASS 条件
+      - 两端真实启动,端口可访问
+      - 后端能创建 plan,返回 201
+      - Playwright 全套通过
+      - 截图存在
+      - README.md 完整
+      - e2e/deliverable.md 存在且说明清晰
+
+      ## FAIL 条件
+      - 任一端口起不来、curl 5xx、Playwright fail、缺 README、缺截图
+      精确报告失败点:哪个 step、哪条命令、实际输出。**不要修改任何代码**。
