@@ -49,7 +49,7 @@ test.describe('v0.3 features', () => {
 
   test('Calendar renders on Dashboard with training days', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    await page.waitForLoadState('load', { timeout: 15000 });
     await page.waitForTimeout(1500);
 
     // Calendar heatmap should be visible
@@ -83,7 +83,7 @@ test.describe('v0.3 features', () => {
   test('Dark mode on mobile dashboard', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(800);
     // Make dark
     const isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
@@ -116,7 +116,7 @@ test.describe('v0.3 features', () => {
     await ctx2.dispose();
 
     await page.goto('/plans/recommend');
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    await page.waitForLoadState('load', { timeout: 15000 });
     await page.waitForTimeout(500);
     await page.click('[data-testid="generate-btn"]');
     await page.waitForSelector('[data-testid="recommend-result"]', { timeout: 15000 });

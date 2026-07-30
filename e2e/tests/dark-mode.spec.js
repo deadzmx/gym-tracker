@@ -7,7 +7,7 @@ mkdirSync(SHOTS, { recursive: true });
 
 test('dark mode toggle', async ({ page }) => {
   await page.goto('/');
-  await page.waitForLoadState('networkidle', { timeout: 15000 });
+  await page.waitForLoadState('load', { timeout: 15000 });
   await page.waitForTimeout(500);
   // Check initial state (likely light)
   const initialDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
@@ -24,7 +24,7 @@ test('dark mode toggle', async ({ page }) => {
 
   // Verify it persists across page navigation
   await page.goto('/exercises');
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('load');
   const persistDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
   expect(persistDark).toBe(afterDark);
   await page.screenshot({ path: join(SHOTS, 'dark-03-exercises.png'), fullPage: true });

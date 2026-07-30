@@ -35,7 +35,7 @@ test.describe('Calendar page: month view + drag-to-reschedule', () => {
 
   test('Calendar page renders current month with session pills', async ({ page }) => {
     await page.goto('/calendar');
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    await page.waitForLoadState('load', { timeout: 15000 });
     await page.waitForTimeout(1000);
 
     // Month label visible
@@ -61,7 +61,7 @@ test.describe('Calendar page: month view + drag-to-reschedule', () => {
 
   test('Drag session pill to another day moves the session', async ({ page }) => {
     await page.goto('/calendar');
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    await page.waitForLoadState('load', { timeout: 15000 });
     await page.waitForTimeout(1000);
 
     // Find a session pill
@@ -135,7 +135,7 @@ test.describe('Calendar page: month view + drag-to-reschedule', () => {
   test('Mobile: calendar responsive layout', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/calendar');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(800);
     const cal = page.locator('[data-testid="month-calendar"]');
     await expect(cal).toBeVisible();
@@ -147,7 +147,7 @@ test.describe('Calendar page: month view + drag-to-reschedule', () => {
 
   test('Month navigation: prev/next/today buttons work', async ({ page }) => {
     await page.goto('/calendar');
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    await page.waitForLoadState('load', { timeout: 15000 });
     await page.waitForTimeout(500);
 
     const initialLabel = await page.locator('[data-testid="month-label"]').textContent();

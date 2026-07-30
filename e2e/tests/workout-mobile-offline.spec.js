@@ -30,7 +30,7 @@ test.describe('Workout page: mobile + offline', () => {
   test('Desktop: big add-set button + connectivity indicator', async ({ page }) => {
     const planId = global.__planId;
     await page.goto(`/workout?plan_id=${planId}`);
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    await page.waitForLoadState('load', { timeout: 15000 });
     await page.waitForTimeout(1500);
 
     // Should show connectivity status
@@ -57,7 +57,7 @@ test.describe('Workout page: mobile + offline', () => {
     const planId = global.__planId;
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto(`/workout?plan_id=${planId}`);
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    await page.waitForLoadState('load', { timeout: 15000 });
     await page.waitForTimeout(1500);
 
     // Add set button should be full width on mobile
@@ -82,7 +82,7 @@ test.describe('Workout page: mobile + offline', () => {
   test('Offline mode: connectivity indicator + sync button', async ({ page, context }) => {
     const planId = global.__planId;
     await page.goto(`/workout?plan_id=${planId}`);
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    await page.waitForLoadState('load', { timeout: 15000 });
     await page.waitForTimeout(1000);
 
     // Go offline
