@@ -221,7 +221,17 @@ Epley 公式:`1RM = weight × (1 + reps / 30)`,例:60kg × 8 reps → 60 × 1.26
 - v0.1 — 核心 CRUD + 训练记录
 - v0.2 — AI 推荐 + 移动端响应式
 - v0.3 — 暗色模式 + PR 自动调重量 + 训练日历热力图 + Workout 离线缓存
-- v0.4 — **月视图日历 + 拖拽改日**(当前)
+- v0.4 — **月视图日历 + 拖拽改日 + Docker 化 + CI 全面 Docker 化**(当前)
+
+## 🐳 Docker 化
+
+v0.4 起项目全面 Docker 化:
+- **多阶段构建**:`dev` 阶段带热重载,`prod` 阶段只产最终镜像
+- **CI 用 docker compose 跑**:`docker compose -f docker-compose.ci.yml up` 起整个测试栈
+- **镜像自动推 GHCR**:`ghcr.io/deadzmx/gym-tracker-{backend,frontend}`
+- **生产单命令启动**:`make up` 或 `docker compose up -d --build`
+
+详见下方 "🐳 Docker 部署" 章节。
 
 ## 🧪 测试
 
