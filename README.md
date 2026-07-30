@@ -275,7 +275,7 @@ make up
 # 或直接用 docker compose
 docker compose up -d --build
 
-# 浏览器 → http://localhost:8080
+# 浏览器 → http://localhost:8123
 ```
 
 ### 开发模式(热重载)
@@ -303,7 +303,7 @@ make shell-backend # 进入后端容器
 | Service | 镜像 | 端口 | 说明 |
 |---|---|---|---|
 | `backend` | `ghcr.io/deadzmx/gym-tracker-backend` | 3001 (内) | Node + Express + SQLite |
-| `frontend` | `ghcr.io/deadzmx/gym-tracker-frontend` | 8080 → 80 | nginx + React 静态文件 + /api 反代 |
+| `frontend` | `ghcr.io/deadzmx/gym-tracker-frontend` | 8123 → 80 | nginx + React 静态文件 + /api 反代 |
 | `e2e` | `ghcr.io/deadzmx/gym-tracker-e2e` | — | Playwright runner(profile: e2e) |
 
 ### 数据持久化
@@ -323,7 +323,7 @@ docker run -d --name gym-backend \
   ghcr.io/deadzmx/gym-tracker-backend:latest
 
 docker run -d --name gym-frontend \
-  -p 8080:80 \
+  -p 8123:80 \
   --link gym-backend:backend \
   ghcr.io/deadzmx/gym-tracker-frontend:latest
 ```
@@ -335,7 +335,7 @@ docker run -d --name gym-frontend \
 git clone https://github.com/deadzmx/gym-tracker.git
 cd gym-tracker
 docker compose up -d --build
-# 反向代理(nginx / Caddy)指向 8080 即可
+# 反向代理(nginx / Caddy)指向 8123 即可
 ```
 
 ## 📄 License

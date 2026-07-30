@@ -15,7 +15,7 @@ build:          ## Build production images
 
 up:             ## Start production stack (detached)
 	$(DOCKER_COMPOSE) up -d --build
-	@echo "✅ gym-tracker is up at http://localhost:8080"
+	@echo "✅ gym-tracker is up at http://localhost:8123"
 
 down:           ## Stop production stack
 	$(DOCKER_COMPOSE) down
