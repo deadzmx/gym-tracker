@@ -167,8 +167,8 @@ jobs:
       - name: Run E2E container
         run: |
           # Get container IPs as fallback (Playwright image sometimes has DNS issues)
-          FRONTEND_IP=$(docker inspect test-frontend --format '{{ .NetworkSettings.Networks.gym-test-net.IPAddress }}')
-          BACKEND_IP=$(docker inspect test-backend --format '{{ .NetworkSettings.Networks.gym-test-net.IPAddress }}')
+          FRONTEND_IP=$(docker inspect test-frontend --format '{{ index .NetworkSettings.Networks "gym-test-net" "IPAddress" }}')
+          BACKEND_IP=$(docker inspect test-backend --format '{{ index .NetworkSettings.Networks "gym-test-net" "IPAddress" }}')
           echo "test-frontend IP: $FRONTEND_IP"
           echo "test-backend IP: $BACKEND_IP"
 
