@@ -149,3 +149,5 @@ jobs:
       - name: Cleanup
         if: always()
         run: docker compose -f docker-compose.ci.yml down -v 2>/dev/null || true
+
+# Workflow re-run trigger
