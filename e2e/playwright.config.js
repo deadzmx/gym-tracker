@@ -20,6 +20,9 @@ module.exports = defineConfig({
       name: 'chromium',
       use: {
         browserName: 'chromium',
+        // Workaround: chromium sometimes treats plain http as https
+        // when internal redirects happen, even though the URL is http://
+        ignoreHTTPSErrors: true,
       },
     },
   ],
