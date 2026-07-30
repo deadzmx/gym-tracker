@@ -32,7 +32,7 @@ services:
       app:
         condition: service_healthy
     environment:
-      BASE_URL: http://app
+      BASE_URL: http://app:3001
       API_URL: http://app:3001
     volumes:
       - ./e2e/screenshots:/app/screenshots
