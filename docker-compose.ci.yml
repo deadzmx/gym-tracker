@@ -26,8 +26,9 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    # nginx:alpine has curl. Use it for healthcheck.
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost/ || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://localhost/ > /dev/null || exit 1"]
       interval: 2s
       timeout: 3s
       retries: 30
