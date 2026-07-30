@@ -1,6 +1,15 @@
 # Gym Tracker — 健身房锻炼计划管理
 
-一套完整自托管的训练日志 + AI 计划推荐 + 移动响应式 + 暗色模式 + 离线缓存的 Web 应用。前后端分离,数据存 SQLite,部署零依赖。
+[![CI](https://github.com/deadzmx/gym-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/deadzmx/gym-tracker/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Node](https://img.shields.io/badge/Node-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)](https://sqlite.org)
+[![Tests](https://img.shields.io/badge/tests-82_passing-4c1?logo=checkmarx&logoColor=white)](#-测试)
+[![E2E](https://img.shields.io/badge/E2E-Playwright-2EAD33?logo=playwright&logoColor=white)](https://playwright.dev)
+
+> 一套完整自托管的训练日志 + AI 计划推荐 + 移动响应式 + 暗色模式 + 离线缓存 + 月视图日历(可拖拽改日)的 Web 应用。前后端分离,数据存 SQLite,部署零依赖。
 
 ## ✨ 功能
 
@@ -213,3 +222,29 @@ Epley 公式:`1RM = weight × (1 + reps / 30)`,例:60kg × 8 reps → 60 × 1.26
 - v0.2 — AI 推荐 + 移动端响应式
 - v0.3 — 暗色模式 + PR 自动调重量 + 训练日历热力图 + Workout 离线缓存
 - v0.4 — **月视图日历 + 拖拽改日**(当前)
+
+## 🧪 测试
+
+```bash
+# 后端
+cd backend && npm install && npm test
+
+# 前端
+cd frontend && npm install && npm test
+
+# E2E(需要后端 + 前端先跑起来)
+cd e2e && npm install && npx playwright install chromium && npm test
+```
+
+| 层级 | 数量 | 工具 |
+|---|---|---|
+| 后端 | 34 | vitest + better-sqlite3 |
+| 前端 | 24 | vitest + @testing-library |
+| E2E | 24 | Playwright |
+| **合计** | **82** | — |
+
+E2E 覆盖:核心 CRUD、AI 推荐流程、移动端响应式、暗色模式、PR 自动调重量、12 周热力图、Workout 离线缓存、月视图日历、拖拽改日。
+
+## 📄 License
+
+[MIT](./LICENSE) © 2026 deadzmx
