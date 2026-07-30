@@ -4,7 +4,7 @@
 # Image: ghcr.io/deadzmx/gym-tracker-e2e
 # ────────────────────────────────────────────────────────────
 
-FROM mcr.microsoft.com/playwright:v1.49.0-jammy
+FROM mcr.microsoft.com/playwright:v1.62.0-jammy
 
 WORKDIR /app
 

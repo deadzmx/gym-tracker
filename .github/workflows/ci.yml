@@ -101,8 +101,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build test image
-        run: docker build -t gym-backend:test --target prod ./backend
+      - name: Build test image (use dev target — has vitest)
+        run: docker build -t gym-backend:test --target dev ./backend
       - name: Run tests
         run: docker run --rm gym-backend:test npx vitest run --reporter=verbose
 
@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build test image
+      - name: Build test image (use build target — has vitest)
         run: docker build -t gym-frontend:test --target build ./frontend
       - name: Run tests
         run: docker run --rm gym-frontend:test npm test -- --run
@@ -169,6 +169,7 @@ jobs:
           docker run --rm --name test-e2e \
             --network gym-test-net \
             -e BASE_URL=http://test-frontend \
+            -e API_URL=http://test-backend:3001 \
             -v "${{ github.workspace }}/e2e/screenshots:/app/screenshots" \
             gym-e2e:test
 

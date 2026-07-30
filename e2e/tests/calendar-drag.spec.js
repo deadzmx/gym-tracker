@@ -6,7 +6,7 @@ const SHOTS = join(__dirname, '..', 'screenshots');
 mkdirSync(SHOTS, { recursive: true });
 
 async function seedSessions() {
-  const ctx = await request.newContext({ baseURL: 'http://localhost:3001' });
+  const ctx = await request.newContext({ baseURL: process.env.API_URL || 'http://localhost:3001' });
   // Create 2 sessions in current month (July 2026 per our sandbox date)
   const r1 = await ctx.post('/api/sessions', {
     data: { plan_id: null, session_date: '2026-07-29' },
@@ -121,7 +121,7 @@ test.describe('Calendar page: month view + drag-to-reschedule', () => {
     await page.waitForTimeout(2000);
 
     // Verify via API
-    const apiCtx = await request.newContext({ baseURL: 'http://localhost:3001' });
+    const apiCtx = await request.newContext({ baseURL: process.env.API_URL || 'http://localhost:3001' });
     const r = await apiCtx.get(`/api/sessions/${sessionId}`);
     const body = await r.json();
     const newDate = body.data.session_date;

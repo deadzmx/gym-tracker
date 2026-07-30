@@ -6,7 +6,7 @@ const SHOTS = join(__dirname, '..', 'screenshots');
 mkdirSync(SHOTS, { recursive: true });
 
 async function seedTestData() {
-  const ctx = await request.newContext({ baseURL: 'http://localhost:3001' });
+  const ctx = await request.newContext({ baseURL: process.env.API_URL || 'http://localhost:3001' });
   const today = new Date();
   for (let i = 0; i < 14; i++) {
     const d = new Date(today);
@@ -99,7 +99,7 @@ test.describe('v0.3 features', () => {
     const today = new Date().toISOString().slice(0, 10);
     const ctx = await request.newContext({ baseURL: 'http://localhost:3000' });
     void ctx;
-    const ctx2 = await request.newContext({ baseURL: 'http://localhost:3001' });
+    const ctx2 = await request.newContext({ baseURL: process.env.API_URL || 'http://localhost:3001' });
     const sRes = await ctx2.post('/api/sessions', {
       data: { plan_id: null, session_date: today },
     });
