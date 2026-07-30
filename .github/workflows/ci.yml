@@ -9,16 +9,15 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/gym-tracker
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/gym-tracker
+  IMAGE_TAG: sha-${{ github.sha }}
 
 jobs:
   # ─────────────────────────────────────────────────────────
-  # Build & push Docker images
-  # Uses docker/metadata-action to compute correct tag list
-  # Then a single build-push-action with all tags
+  # Build & push unified Docker image (frontend + backend)
   # ─────────────────────────────────────────────────────────
   build:
-    name: Build & push images
+    name: Build & push image
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -37,12 +36,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Compute tags for backend
-      - name: Backend image metadata
-        id: meta-backend
+      - name: Compute image tags
+        id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE_PREFIX }}-backend
+          images: ${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -50,51 +48,21 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix=sha-
-          bake-target: gym-backend
 
-      # Compute tags for frontend
-      - name: Frontend image metadata
-        id: meta-frontend
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE_PREFIX }}-frontend
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=sha-
-          bake-target: gym-frontend
-
-      # Build & push backend
-      - name: Build & push backend
+      - name: Build & push unified image
         uses: docker/build-push-action@v6
         with:
-          context: ./backend
-          file: ./backend/Dockerfile
+          context: .
+          file: ./Dockerfile
           target: prod
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta-backend.outputs.tags }}
-          labels: ${{ steps.meta-backend.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      # Build & push frontend
-      - name: Build & push frontend
-        uses: docker/build-push-action@v6
-        with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
-          target: prod
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta-frontend.outputs.tags }}
-          labels: ${{ steps.meta-frontend.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   # ─────────────────────────────────────────────────────────
-  # Backend unit tests (in container, from local Dockerfile)
+  # Backend unit tests (in container)
   # ─────────────────────────────────────────────────────────
   unit-backend:
     name: Backend unit tests
@@ -120,7 +88,7 @@ jobs:
         run: docker run --rm gym-frontend:test npm test -- --run
 
   # ─────────────────────────────────────────────────────────
-  # E2E: use docker compose for proper DNS + networking
+  # E2E: single app container + Playwright container
   # ─────────────────────────────────────────────────────────
   e2e:
     name: E2E (Playwright)
@@ -128,13 +96,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build all test images
+      - name: Build images
         run: |
-          docker build -t gym-backend:test --target prod ./backend
-          docker build -t gym-frontend:test --target prod ./frontend
+          docker build -t gym-tracker:test --target prod .
           docker build -t gym-e2e:test ./e2e
 
-      - name: Run e2e stack (compose handles DNS + healthchecks)
+      - name: Run e2e stack
         run: |
           docker compose -f docker-compose.ci.yml up --abort-on-container-exit --exit-code-from e2e
 
@@ -149,5 +116,3 @@ jobs:
       - name: Cleanup
         if: always()
         run: docker compose -f docker-compose.ci.yml down -v 2>/dev/null || true
-
-# Workflow re-run trigger

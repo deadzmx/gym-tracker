@@ -1,34 +1,25 @@
 # ────────────────────────────────────────────────────────────
 # CI-only test stack — used by GitHub Actions
-# Spins up backend + frontend, runs e2e against them
+# Spins up the unified app, runs e2e against it
 # Then tears down.
 # ────────────────────────────────────────────────────────────
 
 name: gym-tracker-ci
 
 services:
-  backend:
-    image: gym-backend:test
-    container_name: ci-backend
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    image: gym-tracker:test
+    container_name: ci-app
     environment:
       NODE_ENV: test
       PORT: 3001
+      DB_PATH: /app/backend/data/gym.db
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:3001/api/health || exit 1"]
-      interval: 2s
-      timeout: 3s
-      retries: 30
-      start_period: 2s
-
-  frontend:
-    image: gym-frontend:test
-    container_name: ci-frontend
-    depends_on:
-      backend:
-        condition: service_healthy
-    # nginx:alpine has curl. Use it for healthcheck.
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost/ > /dev/null || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:3001/api/health > /dev/null || exit 1"]
       interval: 2s
       timeout: 3s
       retries: 30
@@ -38,11 +29,11 @@ services:
     image: gym-e2e:test
     container_name: ci-e2e
     depends_on:
-      frontend:
+      app:
         condition: service_healthy
     environment:
-      BASE_URL: http://frontend
-      API_URL: http://backend:3001
+      BASE_URL: http://app
+      API_URL: http://app:3001
     volumes:
       - ./e2e/screenshots:/app/screenshots
       - ./e2e/test-results:/app/test-results

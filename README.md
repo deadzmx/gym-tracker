@@ -9,7 +9,7 @@
 [![Tests](https://img.shields.io/badge/tests-82_passing-4c1?logo=checkmarx&logoColor=white)](#-测试)
 [![E2E](https://img.shields.io/badge/E2E-Playwright-2EAD33?logo=playwright&logoColor=white)](https://playwright.dev)
 
-> 一套完整自托管的训练日志 + AI 计划推荐 + 移动响应式 + 暗色模式 + 离线缓存 + 月视图日历(可拖拽改日)的 Web 应用。前后端分离,数据存 SQLite,部署零依赖。**自带 Docker 镜像**,一条命令起服务。
+> 一套完整自托管的训练日志 + AI 计划推荐 + 移动响应式 + 暗色模式 + 离线缓存 + 月视图日历(可拖拽改日)的 Web 应用。Express + React 19,**单 Docker 镜像**统一部署(API + 静态文件),SQLite 持久化,零外部依赖。
 
 ## ✨ 功能
 
@@ -267,7 +267,12 @@ E2E 覆盖:核心 CRUD、AI 推荐流程、移动端响应式、暗色模式、P
 
 ## 🐳 Docker 部署
 
-### 快速启动(生产模式)
+### 🎯 统一镜像(单容器)
+
+生产部署只跑**一个容器** — Express 同时服务 API 和前端静态文件(SPA fallback)。
+一个进程、一个端口、一个镜像。
+
+### 快速启动
 ```bash
 # 用 Makefile(推荐)
 make up
@@ -278,55 +283,69 @@ docker compose up -d --build
 # 浏览器 → http://localhost:8123
 ```
 
-### 开发模式(热重载)
+### 开发模式(热重载,2 个容器)
+
+生产用单容器;开发用 `docker-compose.dev.yml` override,**拆成 2 个容器**(vite + tsx watch)各自热重载:
+
 ```bash
 make dev
-
-# 代码改了自动重载,数据库持久化在 gym-data volume
+# 后端:http://localhost:3001 (tsx watch)
+# 前端:http://localhost:5173 (vite dev with HMR)
 ```
 
 ### 常用命令
 ```bash
 make help         # 查看所有命令
-make build        # 构建镜像
-make up           # 启动生产模式(后台)
-make dev          # 启动开发模式(热重载,前台)
+make build        # 构建统一镜像
+make up           # 生产模式(单容器,后台)
+make dev          # 开发模式(2 容器,前台)
 make logs         # 查看日志
 make down         # 停止
 make clean        # 停止 + 删除 volume(数据会丢!)
 make clean-keep-db # 停止 + 保留数据
-make shell-backend # 进入后端容器
+make shell        # 进入生产容器
 ```
 
 ### 架构
 
+**生产(单容器)**:
+```
+┌─────────────────────────────────┐
+│  gym-tracker container (8123)    │
+│  ┌───────────────────────────┐  │
+│  │  Node + Express           │  │
+│  │   ├─ /api/* (JSON)        │  │
+│  │   └─ /* (SPA fallback)    │  │
+│  │      → /app/frontend/dist │  │
+│  └───────────────────────────┘  │
+└─────────────────────────────────┘
+```
+
 | Service | 镜像 | 端口 | 说明 |
 |---|---|---|---|
-| `backend` | `ghcr.io/deadzmx/gym-tracker-backend` | 3001 (内) | Node + Express + SQLite |
-| `frontend` | `ghcr.io/deadzmx/gym-tracker-frontend` | 8123 → 80 | nginx + React 静态文件 + /api 反代 |
-| `e2e` | `ghcr.io/deadzmx/gym-tracker-e2e` | — | Playwright runner(profile: e2e) |
+| `app` (prod) | `ghcr.io/deadzmx/gym-tracker` | 8123 → 3001 | Express + 静态文件(单进程) |
+
+**开发(2 容器)**:后端 3001 + 前端 5173,各带热重载。
 
 ### 数据持久化
 
 SQLite 数据库存放在 named volume `gym-data`:
-- 容器内路径:`/app/data/gym.db`
+- 容器内路径:`/app/backend/data/gym.db`
 - 主机查看:`docker volume inspect gym-data`
 - 备份:停止容器后 `cp $(docker volume inspect gym-data -f '{{ .Mountpoint }}')/gym.db ./backup.db`
 
 ### 拉到 GHCR 镜像直接跑(无需 clone 代码)
 
 ```bash
-# 最新版
-docker run -d --name gym-backend \
-  -v gym-data:/app/data \
+docker run -d \
+  --name gym-tracker \
+  -p 8123:3001 \
+  -v gym-data:/app/backend/data \
   -e NODE_ENV=production \
-  ghcr.io/deadzmx/gym-tracker-backend:latest
-
-docker run -d --name gym-frontend \
-  -p 8123:80 \
-  --link gym-backend:backend \
-  ghcr.io/deadzmx/gym-tracker-frontend:latest
+  ghcr.io/deadzmx/gym-tracker:latest
 ```
+
+浏览器 → **http://localhost:8123** ✓
 
 ### 部署到服务器(纯 docker compose)
 
