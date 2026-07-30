@@ -7,7 +7,7 @@ module.exports = defineConfig({
   reporter: 'list',
   use: {
     headless: true,
-    baseURL: 'http://localhost:5173',
+    baseURL: process.env.BASE_URL || 'http://localhost:5173',
     viewport: { width: 1280, height: 800 },
     actionTimeout: 10000,
     navigationTimeout: 15000,
@@ -17,9 +17,9 @@ module.exports = defineConfig({
       name: 'chromium',
       use: {
         browserName: 'chromium',
-        launchOptions: {
-          executablePath: '/root/.cache/ms-playwright/chromium-1223/chrome-linux/chrome',
-        },
+        // executablePath: removed — let Playwright auto-detect
+        // CI uses chromium-1234 (installed via `npx playwright install --with-deps chromium`)
+        // local dev uses whatever's in ~/.cache/ms-playwright/
       },
     },
   ],
