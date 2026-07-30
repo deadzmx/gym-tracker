@@ -22,6 +22,10 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --no-audit --no-fund
 COPY . .
+# Build with relative API base so the browser hits same origin
+# (nginx will proxy /api/* to backend container)
+ARG VITE_API_BASE=/api
+ENV VITE_API_BASE=${VITE_API_BASE}
 RUN npm run build
 
 # ─── Prod target: nginx serving static files ───
