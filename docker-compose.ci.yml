@@ -7,13 +7,13 @@
 name: gym-tracker-ci
 
 services:
-  app:
+  tracker:
     build:
       context: .
       dockerfile: Dockerfile
       target: prod
     image: gym-tracker:test
-    container_name: ci-app
+    container_name: ci-tracker
     environment:
       NODE_ENV: test
       PORT: 3001
@@ -29,11 +29,11 @@ services:
     image: gym-e2e:test
     container_name: ci-e2e
     depends_on:
-      app:
+      tracker:
         condition: service_healthy
     environment:
-      BASE_URL: http://app:3001
-      API_URL: http://app:3001
+      BASE_URL: http://tracker:3001
+      API_URL: http://tracker:3001
     volumes:
       - ./e2e/screenshots:/app/screenshots
       - ./e2e/test-results:/app/test-results
