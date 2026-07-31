@@ -1,20 +1,20 @@
 // Shared types for the gym tracker backend.
 
 export type Category =
-  | "chest"
-  | "back"
-  | "legs"
-  | "shoulders"
-  | "arms"
-  | "core"
-  | "cardio";
+  | "胸"
+  | "背"
+  | "腿"
+  | "肩"
+  | "臂"
+  | "核心"
+  | "有氧";
 
 export type Equipment =
-  | "barbell"
-  | "dumbbell"
-  | "machine"
-  | "cable"
-  | "bodyweight";
+  | "杠铃"
+  | "哑铃"
+  | "器械"
+  | "绳索"
+  | "徒手";
 
 export interface Exercise {
   id: number;
@@ -23,6 +23,7 @@ export interface Exercise {
   equipment: Equipment | null;
   primary_muscle: string | null;
   description: string | null;
+  image_url: string | null;       // Emoji or external image URL for illustration
   created_at: string;
 }
 

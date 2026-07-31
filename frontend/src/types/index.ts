@@ -1,21 +1,20 @@
-// Shared TypeScript types — must match /workspace/gym-tracker/docs/design.md §3 + §4 exactly.
+// Shared TypeScript types — must match the backend exactly.
 
 export type ExerciseCategory =
-  | 'chest'
-  | 'back'
-  | 'legs'
-  | 'shoulders'
-  | 'arms'
-  | 'core'
-  | 'cardio';
+  | '胸'
+  | '背'
+  | '腿'
+  | '肩'
+  | '臂'
+  | '核心'
+  | '有氧';
 
 export type Equipment =
-  | 'barbell'
-  | 'dumbbell'
-  | 'machine'
-  | 'cable'
-  | 'bodyweight'
-  | 'cable';
+  | '杠铃'
+  | '哑铃'
+  | '器械'
+  | '绳索'
+  | '徒手';
 
 export type Goal = 'muscle' | 'fat_loss' | 'strength' | 'balanced';
 export type Experience = 'beginner' | 'intermediate' | 'advanced';
@@ -28,7 +27,8 @@ export interface Exercise {
   equipment: Equipment;
   primary_muscle: string;
   description: string | null;
-  created_at: string; // ISO 8601
+  image_url: string | null;       // Emoji or external image URL
+  created_at: string;             // ISO 8601
 }
 
 export interface ExerciseInput {
@@ -37,6 +37,7 @@ export interface ExerciseInput {
   equipment: Equipment;
   primary_muscle: string;
   description?: string | null;
+  image_url?: string | null;
 }
 
 export interface PlanExercise {

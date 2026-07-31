@@ -30,8 +30,8 @@ interface ChatResponse {
 const LLM_TIMEOUT_MS = 12_000;
 
 function classifyCategory(c: string | null): Category {
-  const allowed: Category[] = ["chest", "back", "legs", "shoulders", "arms", "core", "cardio"];
-  return (c && (allowed as string[]).includes(c) ? (c as Category) : "chest");
+  const allowed: Category[] = ["胸", "背", "腿", "肩", "臂", "核心", "有氧"];
+  return (c && (allowed as string[]).includes(c) ? (c as Category) : "胸");
 }
 
 function buildPrompt(input: RecommendInput, exercisePool: Exercise[], prMap: Record<number, number> = {}): string {

@@ -7,6 +7,7 @@ export interface ExerciseInput {
   equipment?: string | null;
   primary_muscle?: string | null;
   description?: string | null;
+  image_url?: string | null;
 }
 
 export function listExercises(category?: string): Exercise[] {
@@ -33,15 +34,16 @@ export function createExercise(input: ExerciseInput): Exercise {
   const db = getDb();
   const result = db
     .prepare(
-      `INSERT INTO exercises (name, category, equipment, primary_muscle, description)
-       VALUES (?, ?, ?, ?, ?)`
+      `INSERT INTO exercises (name, category, equipment, primary_muscle, description, image_url)
+       VALUES (?, ?, ?, ?, ?, ?)`
     )
     .run(
       input.name,
       input.category ?? null,
       input.equipment ?? null,
       input.primary_muscle ?? null,
-      input.description ?? null
+      input.description ?? null,
+      input.image_url ?? null
     );
   const created = getExercise(Number(result.lastInsertRowid));
   if (!created) {
@@ -61,7 +63,7 @@ export function updateExercise(
   }
   db.prepare(
     `UPDATE exercises
-     SET name = ?, category = ?, equipment = ?, primary_muscle = ?, description = ?
+     SET name = ?, category = ?, equipment = ?, primary_muscle = ?, description = ?, image_url = ?
      WHERE id = ?`
   ).run(
     input.name ?? current.name,
@@ -71,6 +73,7 @@ export function updateExercise(
       ? input.primary_muscle
       : current.primary_muscle,
     input.description !== undefined ? input.description : current.description,
+    input.image_url !== undefined ? input.image_url : current.image_url,
     id
   );
   return getExercise(id);

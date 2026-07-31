@@ -21,30 +21,30 @@ interface DayTemplate {
 
 const SPLITS: Record<3 | 4 | 5 | 6, DayTemplate[]> = {
   3: [
-    { name: "全身 - 推", categories: ["chest", "shoulders", "arms"] },
-    { name: "全身 - 拉", categories: ["back", "arms"] },
-    { name: "全身 - 腿 + 核心", categories: ["legs", "core"] },
+    { name: "全身 - 推", categories: ["胸", "肩", "臂"] },
+    { name: "全身 - 拉", categories: ["背", "臂"] },
+    { name: "全身 - 腿 + 核心", categories: ["腿", "核心"] },
   ],
   4: [
-    { name: "上推", categories: ["chest", "shoulders", "arms"] },
-    { name: "上拉", categories: ["back", "arms"] },
-    { name: "下肢", categories: ["legs", "core"] },
-    { name: "上肢补充", categories: ["shoulders", "arms", "core"] },
+    { name: "上推", categories: ["胸", "肩", "臂"] },
+    { name: "上拉", categories: ["背", "臂"] },
+    { name: "下肢", categories: ["腿", "核心"] },
+    { name: "上肢补充", categories: ["肩", "臂", "核心"] },
   ],
   5: [
-    { name: "胸 + 三头", categories: ["chest", "arms"] },
-    { name: "背 + 二头", categories: ["back", "arms"] },
-    { name: "腿", categories: ["legs"] },
-    { name: "肩", categories: ["shoulders"] },
-    { name: "核心 + 弱项", categories: ["core", "arms"] },
+    { name: "胸 + 三头", categories: ["胸", "臂"] },
+    { name: "背 + 二头", categories: ["背", "臂"] },
+    { name: "腿", categories: ["腿"] },
+    { name: "肩", categories: ["肩"] },
+    { name: "核心 + 弱项", categories: ["核心", "臂"] },
   ],
   6: [
-    { name: "胸", categories: ["chest"] },
-    { name: "背", categories: ["back"] },
-    { name: "腿", categories: ["legs"] },
-    { name: "肩", categories: ["shoulders"] },
-    { name: "臂(轻)", categories: ["arms"] },
-    { name: "核心 + 弱项", categories: ["core", "back", "legs"] },
+    { name: "胸", categories: ["胸"] },
+    { name: "背", categories: ["背"] },
+    { name: "腿", categories: ["腿"] },
+    { name: "肩", categories: ["肩"] },
+    { name: "臂(轻)", categories: ["臂"] },
+    { name: "核心 + 弱项", categories: ["核心", "背", "腿"] },
   ],
 };
 
@@ -125,12 +125,12 @@ function pickExercises(
       (equipment === null || equipment.length === 0 || (e.equipment !== null && equipment.includes(e.equipment))) &&
       !usedIds.has(e.id),
   );
-  // Prioritize compound lifts (barbell/dumbbell) over isolation
+  // Prioritize compound lifts (杠铃/哑铃) over isolation
   matches.sort((a, b) => {
     const score = (e: Exercise): number => {
-      if (e.equipment === "barbell") return 3;
-      if (e.equipment === "dumbbell") return 2;
-      if (e.equipment === "machine") return 1;
+      if (e.equipment === "杠铃") return 3;
+      if (e.equipment === "哑铃") return 2;
+      if (e.equipment === "器械") return 1;
       return 0;
     };
     return score(b) - score(a);

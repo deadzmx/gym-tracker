@@ -21,11 +21,11 @@ describe("exercises API", () => {
   it("filters by category", async () => {
     const res = await request(app)
       .get("/api/exercises")
-      .query({ category: "chest" });
+      .query({ category: "胸" });
     expect(res.status).toBe(200);
     expect(res.body.data.length).toBeGreaterThan(0);
     for (const e of res.body.data) {
-      expect(e.category).toBe("chest");
+      expect(e.category).toBe("胸");
     }
   });
 
@@ -59,8 +59,8 @@ describe("exercises API", () => {
       .post("/api/exercises")
       .send({
         name: "测试动作",
-        category: "chest",
-        equipment: "barbell",
+        category: "胸",
+        equipment: "杠铃",
         primary_muscle: "胸大肌",
         description: "测试",
       });

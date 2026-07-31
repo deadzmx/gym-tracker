@@ -33,7 +33,7 @@ describe("POST /api/plans/recommend (rule engine)", () => {
         goal: "magic",
         experience: "beginner",
         days_per_week: 3,
-        available_equipment: ["barbell"],
+        available_equipment: ["杠铃"],
         session_duration_min: 60,
       });
     expect(res.status).toBe(400);
@@ -46,7 +46,7 @@ describe("POST /api/plans/recommend (rule engine)", () => {
         goal: "muscle",
         experience: "intermediate",
         days_per_week: 3,
-        available_equipment: ["barbell", "dumbbell", "machine"],
+        available_equipment: ["杠铃", "哑铃", "器械"],
         session_duration_min: 60,
       });
     expect(res.status).toBe(200);
@@ -67,7 +67,7 @@ describe("POST /api/plans/recommend (rule engine)", () => {
         goal: "balanced",
         experience: "beginner",
         days_per_week: 4,
-        available_equipment: ["barbell", "dumbbell", "machine", "cable", "bodyweight"],
+        available_equipment: ["杠铃", "哑铃", "器械", "绳索", "徒手"],
         session_duration_min: 45,
       });
     expect(res.status).toBe(200);
@@ -92,7 +92,7 @@ describe("POST /api/plans/recommend (rule engine)", () => {
         goal: "muscle",
         experience: "intermediate",
         days_per_week: 3,
-        available_equipment: ["barbell"],
+        available_equipment: ["杠铃"],
         session_duration_min: 60,
       });
     const strength = await request(app)
@@ -101,7 +101,7 @@ describe("POST /api/plans/recommend (rule engine)", () => {
         goal: "strength",
         experience: "intermediate",
         days_per_week: 3,
-        available_equipment: ["barbell"],
+        available_equipment: ["杠铃"],
         session_duration_min: 60,
       });
     expect(muscle.status).toBe(200);
@@ -118,7 +118,7 @@ describe("POST /api/plans/recommend (rule engine)", () => {
         goal: "muscle",
         experience: "beginner",
         days_per_week: 3,
-        available_equipment: ["barbell"],
+        available_equipment: ["杠铃"],
         session_duration_min: 60,
       });
     expect(res.status).toBe(200);
@@ -151,7 +151,7 @@ describe("POST /api/plans/recommend (rule engine)", () => {
         goal: "muscle",
         experience: "intermediate",
         days_per_week: 3,
-        available_equipment: ["barbell", "dumbbell", "machine"],
+        available_equipment: ["杠铃", "哑铃", "器械"],
         session_duration_min: 60,
       });
     expect(res.status).toBe(200);
@@ -189,7 +189,7 @@ describe("POST /api/plans/recommend (rule engine)", () => {
         goal: "muscle",
         experience: "intermediate",
         days_per_week: 3,
-        available_equipment: ["barbell", "dumbbell"],
+        available_equipment: ["杠铃", "哑铃"],
         session_duration_min: 60,
       });
     const strength = await request(app)
@@ -198,7 +198,7 @@ describe("POST /api/plans/recommend (rule engine)", () => {
         goal: "strength",
         experience: "intermediate",
         days_per_week: 3,
-        available_equipment: ["barbell", "dumbbell"],
+        available_equipment: ["杠铃", "哑铃"],
         session_duration_min: 60,
       });
     // Find exercise 1 in both
@@ -224,7 +224,7 @@ describe("POST /api/plans/recommend (rule engine)", () => {
         goal: "muscle",
         experience: "beginner",
         days_per_week: 3,
-        available_equipment: ["bodyweight"],
+        available_equipment: ["徒手"],
         session_duration_min: 30,
         llm: { provider: "minimax", api_key: "sk-bogus-key-for-test-1234" },
       });

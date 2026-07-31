@@ -8,7 +8,7 @@ mkdirSync(SHOTS, { recursive: true });
 test.describe('Workout page: mobile + offline', () => {
   test.beforeAll(async ({ request: ctx }) => {
     // Create a plan with exercises
-    const exercisesRes = await ctx.get(`${process.env.API_URL || "http://localhost:3001"}/api/exercises?category=chest`);
+    const exercisesRes = await ctx.get(`${process.env.API_URL || "http://localhost:3001"}/api/exercises?category=胸`);
     const exercisesJson = await exercisesRes.json();
     const ex = exercisesJson.data[0];
     const planRes = await ctx.post(`${process.env.API_URL || "http://localhost:3001"}/api/plans`, {

@@ -46,20 +46,21 @@ const DURATIONS: Array<{ value: 30 | 45 | 60 | 75 | 90; label: string }> = [
 ];
 
 const EQUIPMENT_OPTIONS: Array<{ value: Equipment; label: string }> = [
-  { value: 'barbell', label: '杠铃' },
-  { value: 'dumbbell', label: '哑铃' },
-  { value: 'machine', label: '固定器械' },
-  { value: 'cable', label: '绳索' },
-  { value: 'bodyweight', label: '自重' },
+  { value: '杠铃', label: '杠铃' },
+  { value: '哑铃', label: '哑铃' },
+  { value: '器械', label: '固定器械' },
+  { value: '绳索', label: '绳索' },
+  { value: '徒手', label: '徒手' },
 ];
 
 const CATEGORY_OPTIONS: Array<{ value: ExerciseCategory; label: string }> = [
-  { value: 'chest', label: '胸' },
-  { value: 'back', label: '背' },
-  { value: 'legs', label: '腿' },
-  { value: 'shoulders', label: '肩' },
-  { value: 'arms', label: '臂' },
-  { value: 'core', label: '核心' },
+  { value: '胸', label: '胸' },
+  { value: '背', label: '背' },
+  { value: '腿', label: '腿' },
+  { value: '肩', label: '肩' },
+  { value: '臂', label: '臂' },
+  { value: '核心', label: '核心' },
+  { value: '有氧', label: '有氧' },
 ];
 
 export default function RecommendPage() {
@@ -71,7 +72,7 @@ export default function RecommendPage() {
   const [experience, setExperience] = useState<Experience>('intermediate');
   const [days, setDays] = useState<3 | 4 | 5 | 6>(4);
   const [duration, setDuration] = useState<30 | 45 | 60 | 75 | 90>(60);
-  const [equipment, setEquipment] = useState<Equipment[]>(['barbell', 'dumbbell', 'machine']);
+  const [equipment, setEquipment] = useState<Equipment[]>(['杠铃', '哑铃', '器械']);
   const [focusAreas, setFocusAreas] = useState<ExerciseCategory[]>([]);
   const [notes, setNotes] = useState('');
   const [result, setResult] = useState<RecommendOutput | null>(null);

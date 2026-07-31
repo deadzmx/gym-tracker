@@ -59,6 +59,7 @@ function applySchema(instance: DB): void {
       equipment TEXT,
       primary_muscle TEXT,
       description TEXT,
+      image_url TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
@@ -113,6 +114,16 @@ function applySchema(instance: DB): void {
     CREATE INDEX IF NOT EXISTS idx_sets_session ON exercise_sets(session_id);
     CREATE INDEX IF NOT EXISTS idx_sets_exercise ON exercise_sets(exercise_id);
   `);
+
+  // ─── Migrations for pre-existing databases ───
+  // SQLite has no `ADD COLUMN IF NOT EXISTS`, so we check first.
+  const cols = instance
+    .prepare("PRAGMA table_info(exercises)")
+    .all() as Array<{ name: string }>;
+  const hasImageCol = cols.some((c) => c.name === "image_url");
+  if (!hasImageCol) {
+    instance.exec("ALTER TABLE exercises ADD COLUMN image_url TEXT");
+  }
 }
 
 function seedExercisesIfEmpty(instance: DB): void {
@@ -120,11 +131,19 @@ function seedExercisesIfEmpty(instance: DB): void {
     .prepare("SELECT COUNT(*) AS n FROM exercises")
     .get() as { n: number };
   if (row.n > 0) {
+    // DB already has data — still update existing rows' image_url if missing
+    // (covers the migration case where the table existed but lacked the column)
+    const updateImg = instance.prepare(
+      "UPDATE exercises SET image_url = ? WHERE name = ? AND (image_url IS NULL OR image_url = '')"
+    );
+    for (const r of SEED_EXERCISES) {
+      updateImg.run(r.image_url, r.name);
+    }
     return;
   }
   const insert = instance.prepare(
-    `INSERT INTO exercises (name, category, equipment, primary_muscle, description)
-     VALUES (?, ?, ?, ?, ?)`
+    `INSERT INTO exercises (name, category, equipment, primary_muscle, description, image_url)
+     VALUES (?, ?, ?, ?, ?, ?)`
   );
   const insertMany = instance.transaction(
     (rows: typeof SEED_EXERCISES) => {
@@ -134,7 +153,8 @@ function seedExercisesIfEmpty(instance: DB): void {
           r.category,
           r.equipment,
           r.primary_muscle,
-          r.description
+          r.description,
+          r.image_url
         );
       }
     }

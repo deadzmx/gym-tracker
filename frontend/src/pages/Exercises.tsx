@@ -5,15 +5,15 @@ import { Card, Empty, Input, Loading, Tabs } from '../components';
 import { queryKeys } from '../lib/queryKeys';
 import type { ExerciseCategory } from '../types';
 
-const CATEGORIES: Array<{ value: 'all' | ExerciseCategory; label: string }> = [
-  { value: 'all', label: '全部' },
-  { value: 'chest', label: '胸' },
-  { value: 'back', label: '背' },
-  { value: 'legs', label: '腿' },
-  { value: 'shoulders', label: '肩' },
-  { value: 'arms', label: '臂' },
-  { value: 'core', label: '核心' },
-  { value: 'cardio', label: '有氧' },
+const CATEGORIES: Array<{ value: 'all' | ExerciseCategory; label: string; emoji: string }> = [
+  { value: 'all',    label: '全部',  emoji: '🏋️' },
+  { value: '胸',  label: '胸',   emoji: '💪' },
+  { value: '背',  label: '背',   emoji: '🪢' },
+  { value: '腿',  label: '腿',   emoji: '🦵' },
+  { value: '肩',  label: '肩',   emoji: '🙆' },
+  { value: '臂',  label: '臂',   emoji: '💪' },
+  { value: '核心', label: '核心', emoji: '🧘' },
+  { value: '有氧', label: '有氧', emoji: '🏃' },
 ];
 
 const CATEGORY_LABEL: Record<string, string> = CATEGORIES.reduce(
@@ -23,6 +23,14 @@ const CATEGORY_LABEL: Record<string, string> = CATEGORIES.reduce(
   },
   {} as Record<string, string>,
 );
+
+const EQUIPMENT_EMOJI: Record<string, string> = {
+  '杠铃': '🏋️',
+  '哑铃': '🏋️',
+  '器械': '🛋️',
+  '绳索': '🪢',
+  '徒手': '🤸',
+};
 
 export default function ExercisesPage() {
   const [category, setCategory] = useState<'all' | ExerciseCategory>('all');
@@ -48,7 +56,7 @@ export default function ExercisesPage() {
   return (
     <div className="space-y-4 md:space-y-6" data-testid="exercises-page">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 dark:text-slate-100">动作库</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">动作库</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">所有可用的训练动作</p>
       </div>
 
@@ -78,12 +86,13 @@ export default function ExercisesPage() {
         />
       ) : (
         <>
-          {/* Desktop: table */}
+          {/* Desktop: table with emoji column */}
           <Card padded={false} className="hidden md:block">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-100 text-sm">
                 <thead className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <tr>
+                    <th className="px-4 py-3 w-16">图示</th>
                     <th className="px-4 py-3">名称</th>
                     <th className="px-4 py-3">分类</th>
                     <th className="px-4 py-3">器械</th>
@@ -93,11 +102,16 @@ export default function ExercisesPage() {
                 <tbody className="divide-y divide-slate-100">
                   {filtered.map((e) => (
                     <tr key={e.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100 dark:text-slate-100">{e.name}</td>
+                      <td className="px-4 py-2 text-2xl text-center">
+                        {e.image_url ?? '🏋️'}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{e.name}</td>
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                         {CATEGORY_LABEL[e.category] ?? e.category}
                       </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{e.equipment}</td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                        {EQUIPMENT_EMOJI[e.equipment] ?? ''} {e.equipment}
+                      </td>
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{e.primary_muscle}</td>
                     </tr>
                   ))}
@@ -106,19 +120,18 @@ export default function ExercisesPage() {
             </div>
           </Card>
 
-          {/* Mobile: card list */}
+          {/* Mobile: card list with image */}
           <div className="space-y-2 md:hidden">
             {filtered.map((e) => (
               <Card key={e.id} className="!p-3">
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl shrink-0">{e.image_url ?? '🏋️'}</span>
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-slate-900 dark:text-slate-100 dark:text-slate-100 truncate">{e.name}</p>
+                    <p className="font-medium text-slate-900 dark:text-slate-100 truncate">{e.name}</p>
                     <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                       {CATEGORY_LABEL[e.category] ?? e.category} · {e.equipment}
                     </p>
-                  </div>
-                  <div className="text-right text-xs text-slate-500 dark:text-slate-400 shrink-0">
-                    {e.primary_muscle}
+                    <p className="text-xs text-slate-400 dark:text-slate-500">{e.primary_muscle}</p>
                   </div>
                 </div>
               </Card>

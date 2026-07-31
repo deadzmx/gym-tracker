@@ -11,22 +11,8 @@ import { HttpError } from "../types";
 
 const router = Router();
 
-const CATEGORIES = [
-  "chest",
-  "back",
-  "legs",
-  "shoulders",
-  "arms",
-  "core",
-  "cardio",
-] as const;
-const EQUIPMENT = [
-  "barbell",
-  "dumbbell",
-  "machine",
-  "cable",
-  "bodyweight",
-] as const;
+const CATEGORIES = ["胸", "背", "腿", "肩", "臂", "核心", "有氧"] as const;
+const EQUIPMENT = ["杠铃", "哑铃", "器械", "绳索", "徒手"] as const;
 
 const createSchema = z.object({
   name: z.string().min(1),
@@ -34,6 +20,7 @@ const createSchema = z.object({
   equipment: z.enum(EQUIPMENT).optional().nullable(),
   primary_muscle: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
+  image_url: z.string().optional().nullable(),
 });
 
 const updateSchema = createSchema.partial();
