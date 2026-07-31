@@ -7,12 +7,9 @@ import {
   listExercises,
   updateExercise,
 } from "../repositories/exerciseRepository";
-import { HttpError } from "../types";
+import { CATEGORIES, EQUIPMENT, HttpError } from "../types";
 
 const router = Router();
-
-const CATEGORIES = ["胸", "背", "腿", "肩", "臂", "核心", "有氧"] as const;
-const EQUIPMENT = ["杠铃", "哑铃", "器械", "绳索", "徒手"] as const;
 
 const createSchema = z.object({
   name: z.string().min(1),

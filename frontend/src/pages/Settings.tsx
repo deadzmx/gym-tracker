@@ -68,7 +68,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-4 md:space-y-6 max-w-2xl mx-auto" data-testid="settings-page">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 dark:text-slate-100">设置</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">设置</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">配置 LLM provider 和 API key</p>
       </div>
 
@@ -173,7 +173,7 @@ export default function SettingsPage() {
         </ul>
       </Card>
 
-      <Card title="关于" description="Gym Tracker v0.2">
+      <Card title="关于" description="Gym Tracker v0.4">
         <p className="text-sm text-slate-600 dark:text-slate-300">
           一个完整自托管的健身房训练日志 + AI 计划推荐系统。
           技术栈:React 19 + Vite + Tailwind / Node.js + Express + SQLite / Playwright。

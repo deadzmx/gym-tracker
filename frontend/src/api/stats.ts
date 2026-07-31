@@ -1,5 +1,5 @@
 import { client } from './client';
-import { unwrap } from './unwrap';
+import { unwrap, unwrapOne } from './unwrap';
 import type { CalendarHeatmapDay, PersonalRecord, StatsSummary, VolumePoint } from '../types';
 
 export interface VolumeParams {
@@ -61,12 +61,12 @@ export const statsApi = {
     return list.map(normalizeVolume);
   },
 
-  personalRecords: async (exerciseId: number): Promise<PersonalRecord[]> => {
+  personalRecords: async (exerciseId: number): Promise<PersonalRecord | null> => {
     const { data } = await client.get<unknown>(
       '/stats/personal-records',
       { params: { exercise_id: exerciseId } },
     );
-    return unwrap<PersonalRecord>(data);
+    return unwrapOne<PersonalRecord>(data);
   },
 
   calendar: async (params: CalendarParams = {}): Promise<CalendarHeatmapDay[]> => {

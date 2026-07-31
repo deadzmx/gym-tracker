@@ -4,7 +4,7 @@
 // - On drop: calls onMoveSession(sessionId, newDate)
 // - Pure presentation — state, fetching, mutation live in the parent page
 
-import { useMemo, type CSSProperties } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import {
   DndContext,
   PointerSensor,
@@ -35,7 +35,6 @@ export interface MonthCalendarProps {
   sessions: MonthSession[];
   onMoveSession: (sessionId: number, fromDate: string, toDate: string) => void;
   onSessionClick?: (session: MonthSession) => void;
-  onMonthChange?: (year: number, month: number) => void;
   className?: string;
 }
 
@@ -103,18 +102,16 @@ function DroppableDay({
   cell,
   sessions,
   onSessionClick,
-  isDragOver,
 }: {
   cell: CalendarCell;
   sessions: MonthSession[];
   onSessionClick?: MonthCalendarProps['onSessionClick'];
-  isDragOver: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `day-${cell.date}`,
     data: { date: cell.date },
   });
-  const active = isOver || isDragOver;
+  const active = isOver;
   return (
     <div
       ref={setNodeRef}
@@ -165,7 +162,7 @@ export function MonthCalendar({
   className,
 }: MonthCalendarProps) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
-  const [draggingId, setDraggingId] = useDraggableState();
+  const [draggingId, setDraggingId] = useState<number | null>(null);
 
   const sessionsByDate = useMemo(() => {
     const map = new Map<string, MonthSession[]>();
@@ -231,7 +228,6 @@ export function MonthCalendar({
                 cell={cell}
                 sessions={daySessions}
                 onSessionClick={onSessionClick}
-                isDragOver={false}
               />
             );
           })}
@@ -247,9 +243,4 @@ export function MonthCalendar({
     </div>
   );
 }
-
-// Local state hook for tracking which session is being dragged
-import { useState } from 'react';
-function useDraggableState(): [number | null, (id: number | null) => void] {
-  return useState<number | null>(null);
-}
+// (useDraggableState was removed; useState<number | null>(null) inline)

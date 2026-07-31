@@ -1,7 +1,7 @@
 // LLM adapters for MiniMax and 智谱 (Zhipu GLM).
 // Both follow OpenAI-compatible chat completions API, so we use a thin wrapper.
 
-import type { Equipment, LlmProvider, RecommendInput, RecommendOutput, Exercise, Category, Experience, Goal } from "../types";
+import type { LlmProvider, RecommendInput, RecommendOutput, Exercise, Experience, Goal } from "../types";
 
 const ENDPOINTS: Record<LlmProvider, { url: string; defaultModel: string }> = {
   minimax: {
@@ -28,11 +28,6 @@ interface ChatResponse {
 }
 
 const LLM_TIMEOUT_MS = 45_000; // Bumped from 12s — international + DNS can be slow
-
-function classifyCategory(c: string | null): Category {
-  const allowed: Category[] = ["胸", "背", "腿", "肩", "臂", "核心", "有氧"];
-  return (c && (allowed as string[]).includes(c) ? (c as Category) : "胸");
-}
 
 function buildPrompt(input: RecommendInput, exercisePool: Exercise[], prMap: Record<number, number> = {}): string {
   const goalMap: Record<Goal, string> = {
@@ -121,7 +116,11 @@ function extractJson(text: string): unknown | null {
   }
 }
 
-function validateLlmJson(obj: unknown, exercisePool: Exercise[]): RecommendOutput | null {
+function validateLlmJson(
+  obj: unknown,
+  exercisePool: Exercise[],
+  provider: LlmProvider,
+): RecommendOutput | null {
   if (typeof obj !== "object" || obj === null) return null;
   const o = obj as Record<string, unknown>;
   if (typeof o.name !== "string" || typeof o.description !== "string" || typeof o.rationale !== "string") {
@@ -143,25 +142,27 @@ function validateLlmJson(obj: unknown, exercisePool: Exercise[]): RecommendOutpu
       if (typeof e.rest_seconds !== "number") return null;
     }
   }
-  // Coerce
+  // Coerce — the loop above proved these are the right shapes, but TS
+  // can't narrow the `unknown` array contents across the loop boundary.
+  // Safe: every field below was just typeof-checked above.
   return {
     name: o.name,
     description: o.description,
-    days: (o.days as Record<string, unknown>[]).map((d, idx) => ({
-      name: d.name as string,
-      day_of_week: d.day_of_week as number,
-      exercises: (d.exercises as Record<string, unknown>[]).map((e, i) => ({
-        exercise_id: e.exercise_id as number,
+    days: (o.days as Array<{ name: string; day_of_week: number; exercises: Array<{ exercise_id: number; order_index?: number; target_sets: number; target_reps: number; rest_seconds: number }> }>).map((d) => ({
+      name: d.name,
+      day_of_week: d.day_of_week,
+      exercises: d.exercises.map((e, i) => ({
+        exercise_id: e.exercise_id,
         order_index: typeof e.order_index === "number" ? e.order_index : i,
-        target_sets: e.target_sets as number,
-        target_reps: e.target_reps as number,
+        target_sets: e.target_sets,
+        target_reps: e.target_reps,
         target_weight: null,
-        rest_seconds: e.rest_seconds as number,
+        rest_seconds: e.rest_seconds,
       })),
     })),
     rationale: o.rationale,
-    source: "llm",
-    provider: undefined as never, // set by caller
+    source: "llm" as const,
+    provider,
   };
 }
 
@@ -248,22 +249,10 @@ export async function callLlm(
   if (!parsed) {
     throw new Error("LLM returned invalid JSON");
   }
-  const validated = validateLlmJson(parsed, exercisePool);
+  const validated = validateLlmJson(parsed, exercisePool, provider);
   if (!validated) {
     throw new Error("LLM JSON failed schema validation");
   }
-  validated.provider = provider;
-  // Re-classify categories to satisfy type narrowing (in case model returns unknown strings)
-  validated.days = validated.days.map((d) => ({
-    ...d,
-    exercises: d.exercises.map((e) => ({
-      ...e,
-      // ensure type conforms; we already validated ids against pool
-    })),
-  }));
-  // Avoid 'Category' import warning
-  void classifyCategory;
-  void ({} as Equipment);
   return validated;
 }
 

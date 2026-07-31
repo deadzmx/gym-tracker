@@ -25,10 +25,15 @@ export class ApiClientError extends Error {
   }
 }
 
+// Default axios timeout. Must outlast backend's LLM_TIMEOUT_MS (45s) so the
+// browser doesn't bail out before the server has a chance to respond.
+// 60s gives a margin for LLM round-trips + 智普 cold start.
+export const CLIENT_TIMEOUT_MS = 60_000;
+
 export const client: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 15000,
+  timeout: CLIENT_TIMEOUT_MS,
 });
 
 function extractErrorPayload(error: AxiosError): {

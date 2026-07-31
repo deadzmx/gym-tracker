@@ -1,21 +1,23 @@
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { recommendApi } from '../api/recommend';
 import { plansApi } from '../api/plans';
 import { exercisesApi } from '../api/exercises';
 import { Button, Card, Input, Loading, Select, useToast } from '../components';
-import { dayName, queryKeys } from '../lib/queryKeys';
+import { queryKeys } from '../lib/queryKeys'
+import { dayName } from '../lib/format';
 import { loadSettings } from '../lib/settings';
-import type {
-  Equipment,
-  Experience,
-  ExerciseCategory,
-  Goal,
-  RecommendInput,
-  RecommendOutput,
+import {
+  CATEGORIES,
+  EQUIPMENT_OPTIONS as EQUIPMENT_OPTIONS_VALUES,
+  type Equipment,
+  type Experience,
+  type ExerciseCategory,
+  type Goal,
+  type RecommendInput,
+  type RecommendOutput,
 } from '../types';
-import { useQueryClient } from '@tanstack/react-query';
 
 const GOALS: Array<{ value: Goal; label: string; desc: string }> = [
   { value: 'muscle', label: '💪 增肌', desc: '提高肌肉量,中高容量训练' },
@@ -45,23 +47,21 @@ const DURATIONS: Array<{ value: 30 | 45 | 60 | 75 | 90; label: string }> = [
   { value: 90, label: '90 分钟' },
 ];
 
-const EQUIPMENT_OPTIONS: Array<{ value: Equipment; label: string }> = [
-  { value: '杠铃', label: '杠铃' },
-  { value: '哑铃', label: '哑铃' },
-  { value: '器械', label: '固定器械' },
-  { value: '绳索', label: '绳索' },
-  { value: '徒手', label: '徒手' },
-];
+// User-facing labels may differ from the raw enum values (e.g. "器械" → "固定器械")
+// so this mapping is kept here rather than derived from EQUIPMENT_OPTIONS.
+const EQUIPMENT_LABELS: Record<Equipment, string> = {
+  杠铃: '杠铃',
+  哑铃: '哑铃',
+  器械: '固定器械',
+  绳索: '绳索',
+  徒手: '徒手',
+};
 
-const CATEGORY_OPTIONS: Array<{ value: ExerciseCategory; label: string }> = [
-  { value: '胸', label: '胸' },
-  { value: '背', label: '背' },
-  { value: '腿', label: '腿' },
-  { value: '肩', label: '肩' },
-  { value: '臂', label: '臂' },
-  { value: '核心', label: '核心' },
-  { value: '有氧', label: '有氧' },
-];
+const EQUIPMENT_OPTIONS: Array<{ value: Equipment; label: string }> =
+  EQUIPMENT_OPTIONS_VALUES.map((value) => ({ value, label: EQUIPMENT_LABELS[value] }));
+
+const CATEGORY_OPTIONS: Array<{ value: ExerciseCategory; label: string }> =
+  CATEGORIES.map((value) => ({ value, label: value }));
 
 export default function RecommendPage() {
   const navigate = useNavigate();
@@ -143,7 +143,7 @@ export default function RecommendPage() {
             target_weight: e.target_weight,
             rest_seconds: e.rest_seconds,
           })),
-        } as any);
+        });
         savedIds.push(plan.id);
       }
       return savedIds;
@@ -172,7 +172,7 @@ export default function RecommendPage() {
   return (
     <div className="space-y-4 md:space-y-6" data-testid="recommend-page">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 dark:text-slate-100">✨ AI 推荐训练计划</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">✨ AI 推荐训练计划</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
           填几个关键问题,生成一个完整的周训练计划
         </p>
@@ -198,7 +198,7 @@ export default function RecommendPage() {
                       : 'rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-left hover:border-slate-300'
                   }
                 >
-                  <p className="font-semibold text-slate-900 dark:text-slate-100 dark:text-slate-100">{g.label}</p>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">{g.label}</p>
                   <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{g.desc}</p>
                 </button>
               ))}
@@ -370,7 +370,7 @@ export default function RecommendPage() {
                     data-testid={`day-${idx}`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-slate-900 dark:text-slate-100 dark:text-slate-100">{day.name}</h4>
+                      <h4 className="font-semibold text-slate-900 dark:text-slate-100">{day.name}</h4>
                       <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:text-slate-300">
                         {dayName(day.day_of_week)}
                       </span>

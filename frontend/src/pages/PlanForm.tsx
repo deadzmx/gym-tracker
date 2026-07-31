@@ -12,7 +12,8 @@ import {
   Textarea,
   useToast,
 } from '../components';
-import { dayName, queryKeys } from '../lib/queryKeys';
+import { queryKeys } from '../lib/queryKeys'
+import { dayName } from '../lib/format';
 import type { PlanExerciseInput, WorkoutPlanInput } from '../types';
 
 interface Row {
@@ -158,7 +159,7 @@ export default function PlanFormPage() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6" data-testid="plan-form-page">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 dark:text-slate-100">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
           {isEdit ? '编辑计划' : '新建计划'}
         </h1>
         <div className="flex gap-2">

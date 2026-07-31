@@ -5,7 +5,7 @@ import { Card, Empty, Input, Loading, Tabs } from '../components';
 import { queryKeys } from '../lib/queryKeys';
 import type { ExerciseCategory } from '../types';
 
-const CATEGORIES: Array<{ value: 'all' | ExerciseCategory; label: string; emoji: string }> = [
+const CATEGORY_TABS: Array<{ value: 'all' | ExerciseCategory; label: string; emoji: string }> = [
   { value: 'all',    label: '全部',  emoji: '🏋️' },
   { value: '胸',  label: '胸',   emoji: '💪' },
   { value: '背',  label: '背',   emoji: '🪢' },
@@ -15,14 +15,6 @@ const CATEGORIES: Array<{ value: 'all' | ExerciseCategory; label: string; emoji:
   { value: '核心', label: '核心', emoji: '🧘' },
   { value: '有氧', label: '有氧', emoji: '🏃' },
 ];
-
-const CATEGORY_LABEL: Record<string, string> = CATEGORIES.reduce(
-  (acc, c) => {
-    acc[c.value] = c.label;
-    return acc;
-  },
-  {} as Record<string, string>,
-);
 
 const EQUIPMENT_EMOJI: Record<string, string> = {
   '杠铃': '🏋️',
@@ -63,7 +55,7 @@ export default function ExercisesPage() {
       <Card>
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <Tabs
-            items={CATEGORIES.map((c) => ({ value: c.value, label: c.label }))}
+            items={CATEGORY_TABS.map((c) => ({ value: c.value, label: c.label }))}
             value={category}
             onChange={(v) => setCategory(v)}
           />
@@ -107,7 +99,7 @@ export default function ExercisesPage() {
                       </td>
                       <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{e.name}</td>
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                        {CATEGORY_LABEL[e.category] ?? e.category}
+                        {e.category}
                       </td>
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                         {EQUIPMENT_EMOJI[e.equipment] ?? ''} {e.equipment}
@@ -129,7 +121,7 @@ export default function ExercisesPage() {
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-slate-900 dark:text-slate-100 truncate">{e.name}</p>
                     <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                      {CATEGORY_LABEL[e.category] ?? e.category} · {e.equipment}
+                      {e.category} · {e.equipment}
                     </p>
                     <p className="text-xs text-slate-400 dark:text-slate-500">{e.primary_muscle}</p>
                   </div>

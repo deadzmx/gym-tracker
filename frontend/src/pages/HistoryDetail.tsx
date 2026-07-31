@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { sessionsApi, setsApi } from '../api/sessions';
 import { Button, Card, Empty, Input, Loading, useToast } from '../components';
-import { formatDate, formatDateTime, queryKeys, setVolume } from '../lib/queryKeys';
+import { queryKeys } from '../lib/queryKeys'
+import { formatDate, formatDateTime, setVolume } from '../lib/format';
 import type { ExerciseSet } from '../types';
 
 export default function HistoryDetailPage() {
@@ -75,7 +76,7 @@ export default function HistoryDetailPage() {
     <div className="space-y-6" data-testid="history-detail-page">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 dark:text-slate-100">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             {formatDate(session.session_date)} ·{' '}
             {session.plan?.name ?? (session.plan_id ? `计划 #${session.plan_id}` : '自由训练')}
           </h1>
@@ -120,10 +121,13 @@ export default function HistoryDetailPage() {
                         <Input
                           type="number"
                           min={0}
-                          value={s.reps}
-                          onChange={(e) => {
+                          defaultValue={s.reps ?? ''}
+                          key={`reps-${s.id}-${s.reps}`}
+                          onBlur={(e) => {
                             const v = Number(e.target.value);
-                            updateMut.mutate({ id: s.id, input: { ...s, reps: v } });
+                            if (v !== s.reps) {
+                              updateMut.mutate({ id: s.id, input: { ...s, reps: v } });
+                            }
                           }}
                         />
                       </div>
@@ -132,10 +136,13 @@ export default function HistoryDetailPage() {
                           type="number"
                           min={0}
                           step={0.5}
-                          value={s.weight}
-                          onChange={(e) => {
+                          defaultValue={s.weight ?? ''}
+                          key={`weight-${s.id}-${s.weight}`}
+                          onBlur={(e) => {
                             const v = Number(e.target.value);
-                            updateMut.mutate({ id: s.id, input: { ...s, weight: v } });
+                            if (v !== s.weight) {
+                              updateMut.mutate({ id: s.id, input: { ...s, weight: v } });
+                            }
                           }}
                         />
                       </div>

@@ -1,20 +1,10 @@
 // Shared TypeScript types — must match the backend exactly.
 
-export type ExerciseCategory =
-  | '胸'
-  | '背'
-  | '腿'
-  | '肩'
-  | '臂'
-  | '核心'
-  | '有氧';
+export const CATEGORIES = ['胸', '背', '腿', '肩', '臂', '核心', '有氧'] as const;
+export const EQUIPMENT_OPTIONS = ['杠铃', '哑铃', '器械', '绳索', '徒手'] as const;
 
-export type Equipment =
-  | '杠铃'
-  | '哑铃'
-  | '器械'
-  | '绳索'
-  | '徒手';
+export type ExerciseCategory = typeof CATEGORIES[number];
+export type Equipment = typeof EQUIPMENT_OPTIONS[number];
 
 export type Goal = 'muscle' | 'fat_loss' | 'strength' | 'balanced';
 export type Experience = 'beginner' | 'intermediate' | 'advanced';
@@ -140,12 +130,15 @@ export interface VolumePoint {
   sets: number;
 }
 
+export interface PrMarker {
+  value: number;
+  date: string; // YYYY-MM-DD
+}
+
 export interface PersonalRecord {
-  exercise_id: number;
-  max_weight: number;
-  max_volume: number;
-  estimated_1rm: number;
-  achieved_at: string | null;
+  max_weight: PrMarker | null;
+  max_volume: PrMarker | null;
+  estimated_1rm: PrMarker | null;
 }
 
 export interface ApiError {

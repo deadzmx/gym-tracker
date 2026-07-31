@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Card, Empty, Input, Loading, useToast } from '../components';
 import { plansApi } from '../api/plans';
 import { sessionsApi, setsApi } from '../api/sessions';
-import { queryKeys, todayIso } from '../lib/queryKeys';
+import { queryKeys } from '../lib/queryKeys'
+import { todayIso } from '../lib/format';
 import { isOnline, onConnectivityChange, queueSession, queueSet } from '../lib/offlineCache';
 import { syncPending, getPendingSummary } from '../lib/syncQueue';
 import type { ExerciseSetInput, PlanExercise } from '../types';
@@ -48,7 +49,6 @@ export default function WorkoutPage() {
   const [online, setOnline] = useState<boolean>(isOnline());
   const [pending, setPending] = useState<{ sessions: number; sets: number }>({ sessions: 0, sets: 0 });
   const [syncing, setSyncing] = useState(false);
-  const restRef = useRef<number | null>(null);
 
   // Watch connectivity
   useEffect(() => {
@@ -200,7 +200,6 @@ export default function WorkoutPage() {
   const startRest = (seconds: number) => {
     setRestTarget(seconds);
     setRestRemaining(seconds);
-    restRef.current = seconds;
   };
   const stopRest = () => {
     setRestRemaining(null);

@@ -6,7 +6,7 @@ import { listExercises } from "../repositories/exerciseRepository";
 import { recommend as recommendRule, type PrMap } from "../services/recommend";
 import { callLlm, testLlmConnection } from "../services/llm";
 import { listAllPersonalRecords } from "../repositories/statsRepository";
-import { HttpError, type RecommendOutput } from "../types";
+import { CATEGORIES, EQUIPMENT, HttpError, type RecommendOutput } from "../types";
 
 const router = Router();
 
@@ -14,8 +14,8 @@ const goalSchema = z.enum(["muscle", "fat_loss", "strength", "balanced"]);
 const experienceSchema = z.enum(["beginner", "intermediate", "advanced"]);
 const daysSchema = z.union([z.literal(3), z.literal(4), z.literal(5), z.literal(6)]);
 const durationSchema = z.union([z.literal(30), z.literal(45), z.literal(60), z.literal(75), z.literal(90)]);
-const equipmentSchema = z.enum(["杠铃", "哑铃", "器械", "绳索", "徒手"]);
-const categorySchema = z.enum(["胸", "背", "腿", "肩", "臂", "核心", "有氧"]);
+const equipmentSchema = z.enum(EQUIPMENT);
+const categorySchema = z.enum(CATEGORIES);
 const providerSchema = z.enum(["minimax", "zhipu"]);
 
 const recommendSchema = z.object({

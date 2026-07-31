@@ -10,7 +10,8 @@ import {
   Modal,
   useToast,
 } from '../components';
-import { dayName, queryKeys } from '../lib/queryKeys';
+import { queryKeys } from '../lib/queryKeys'
+import { dayName } from '../lib/format';
 import type { WorkoutPlan } from '../types';
 
 export default function PlansListPage() {
@@ -53,7 +54,7 @@ export default function PlansListPage() {
     <div className="space-y-4 md:space-y-6" data-testid="plans-page">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 dark:text-slate-100">训练计划</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">训练计划</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">管理你的训练模板</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -87,7 +88,7 @@ export default function PlansListPage() {
             <Card key={p.id} className="flex flex-col">
               <div>
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 dark:text-slate-100">{p.name}</h3>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{p.name}</h3>
                   <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700">
                     {dayName(p.day_of_week)}
                   </span>

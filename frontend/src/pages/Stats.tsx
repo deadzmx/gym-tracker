@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import type { PrMarker } from '../types';
 import {
   CartesianGrid,
   Line,
@@ -13,7 +14,33 @@ import { Card, Empty, Loading, Select } from '../components';
 import { exercisesApi } from '../api/exercises';
 import { statsApi } from '../api/stats';
 import { queryKeys } from '../lib/queryKeys';
-import { useState } from 'react';
+
+function PrCard({
+  label,
+  marker,
+  unit,
+  tone,
+}: {
+  label: string;
+  marker: PrMarker | null;
+  unit: string;
+  tone?: 'brand';
+}) {
+  const valueClass = tone === 'brand' ? 'text-brand-600' : 'text-slate-900 dark:text-slate-100';
+  return (
+    <div className="rounded-lg border border-slate-200 dark:border-slate-700 p-4">
+      <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        {label}
+      </p>
+      <p className={`mt-1 text-2xl font-bold ${valueClass}`}>
+        {marker ? `${marker.value} ${unit}` : '—'}
+      </p>
+      <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+        {marker?.date ?? '尚无记录'}
+      </p>
+    </div>
+  );
+}
 
 export default function StatsPage() {
   const [exerciseId, setExerciseId] = useState<string>('');
@@ -48,7 +75,7 @@ export default function StatsPage() {
   return (
     <div className="space-y-4 md:space-y-6" data-testid="stats-page">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 dark:text-slate-100">统计</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">统计</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">查看动作的容量曲线和 PR</p>
       </div>
 
@@ -99,33 +126,15 @@ export default function StatsPage() {
           <Card title="个人记录 (PR)">
             {prQ.isLoading ? (
               <Loading label="加载 PR…" />
-            ) : (prQ.data?.length ?? 0) === 0 ? (
-              <Empty title="还没有 PR" />
+            ) : !prQ.data ||
+              (!prQ.data.max_weight && !prQ.data.max_volume && !prQ.data.estimated_1rm) ? (
+              <Empty title="还没有 PR" description="完成几组训练就会显示 PR" />
             ) : (
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="text-left text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    <th className="py-2">最大重量</th>
-                    <th className="py-2">最大容量</th>
-                    <th className="py-2">1RM 估算</th>
-                    <th className="py-2">达成时间</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {prQ.data?.map((pr, i) => (
-                    <tr key={`${pr.exercise_id}-${i}`}>
-                      <td className="py-2 font-semibold text-brand-600">
-                        {pr.max_weight} kg
-                      </td>
-                      <td className="py-2">{pr.max_volume} kg</td>
-                      <td className="py-2">{pr.estimated_1rm} kg</td>
-                      <td className="py-2 text-slate-500 dark:text-slate-400">
-                        {pr.achieved_at?.slice(0, 10) ?? '—'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3" data-testid="pr-grid">
+                <PrCard label="最大重量" marker={prQ.data.max_weight} unit="kg" tone="brand" />
+                <PrCard label="最大单组容量" marker={prQ.data.max_volume} unit="kg" />
+                <PrCard label="1RM 估算 (Epley)" marker={prQ.data.estimated_1rm} unit="kg" />
+              </div>
             )}
           </Card>
         </>

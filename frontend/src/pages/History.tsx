@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { sessionsApi } from '../api/sessions';
-import { Card, Empty, Loading } from '../components';
-import { formatDate, formatDateTime, queryKeys, setVolume } from '../lib/queryKeys';
+import { Button, Card, Empty, Loading } from '../components';
+import { queryKeys } from '../lib/queryKeys'
+import { formatDate, formatDateTime, setVolume } from '../lib/format';
 
 export default function HistoryPage() {
   const sessionsQ = useQuery({
@@ -24,7 +25,7 @@ export default function HistoryPage() {
   return (
     <div className="space-y-4 md:space-y-6" data-testid="history-page">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 dark:text-slate-100">训练历史</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">训练历史</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">按时间倒序展示</p>
       </div>
 
@@ -34,7 +35,7 @@ export default function HistoryPage() {
           description="开始你的第一次训练"
           action={
             <Link to="/plans">
-              <Link to="/plans" />
+              <Button>去创建计划</Button>
             </Link>
           }
         />
@@ -61,7 +62,7 @@ export default function HistoryPage() {
                       className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-50"
                     >
                       <div>
-                        <p className="font-medium text-slate-900 dark:text-slate-100 dark:text-slate-100">
+                        <p className="font-medium text-slate-900 dark:text-slate-100">
                           {formatDate(s.session_date)} ·{' '}
                           {s.plan?.name ?? (s.plan_id ? `计划 #${s.plan_id}` : '自由训练')}
                         </p>

@@ -217,14 +217,70 @@ export function getPersonalRecords(
 // List PRs for ALL exercises that have any completed sets.
 // Returns an array (one entry per exercise_id), useful for batch operations
 // like AI plan recommendation.
+//
+// Single grouped query — pulls all completed sets with weight + reps, then
+// reduces per exercise in JS. Avoids the N+1 of calling getPersonalRecords
+// for each distinct exercise_id.
 export function listAllPersonalRecords(): { exercise_id: number; pr: PersonalRecords }[] {
-  const ids = getDb()
-    .prepare<[], { id: number }>(
-      `SELECT DISTINCT exercise_id AS id FROM exercise_sets
-         WHERE completed = 1 AND weight IS NOT NULL AND reps IS NOT NULL`
+  const rows = getDb()
+    .prepare<
+      [],
+      {
+        exercise_id: number;
+        weight: number | null;
+        reps: number | null;
+        session_date: string;
+      }
+    >(
+      `SELECT es.exercise_id AS exercise_id,
+              es.weight, es.reps, s.session_date
+         FROM exercise_sets es
+         JOIN workout_sessions s ON s.id = es.session_id
+         WHERE es.completed = 1
+           AND es.weight IS NOT NULL
+           AND es.reps IS NOT NULL`
     )
     .all();
-  return ids.map(({ id }) => ({ exercise_id: id, pr: getPersonalRecords(id) }));
+
+  // exercise_id -> { maxWeight, maxVolume, max1rm }
+  const byExercise = new Map<
+    number,
+    {
+      maxWeight: { value: number; date: string } | null;
+      maxVolume: { value: number; date: string } | null;
+      max1rm: { value: number; date: string } | null;
+    }
+  >();
+
+  for (const r of rows) {
+    const slot =
+      byExercise.get(r.exercise_id) ??
+      { maxWeight: null, maxVolume: null, max1rm: null };
+    if (r.weight !== null) {
+      if (!slot.maxWeight || r.weight > slot.maxWeight.value) {
+        slot.maxWeight = { value: r.weight, date: r.session_date };
+      }
+      const volume = r.weight * (r.reps ?? 0);
+      if (!slot.maxVolume || volume > slot.maxVolume.value) {
+        slot.maxVolume = { value: Math.round(volume * 100) / 100, date: r.session_date };
+      }
+      const e1rm = r.weight * (1.0 + (r.reps ?? 0) / 30.0);
+      const rounded = Math.round(e1rm * 100) / 100;
+      if (!slot.max1rm || rounded > slot.max1rm.value) {
+        slot.max1rm = { value: rounded, date: r.session_date };
+      }
+    }
+    byExercise.set(r.exercise_id, slot);
+  }
+
+  return Array.from(byExercise.entries()).map(([exercise_id, slot]) => ({
+    exercise_id,
+    pr: {
+      max_weight: slot.maxWeight,
+      max_volume: slot.maxVolume,
+      estimated_1rm: slot.max1rm,
+    },
+  }));
 }
 
 // Calendar data: per-day summary (sessions, sets, volume) for a given window.

@@ -2,7 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { plansApi } from '../api/plans';
 import { Button, Card, Empty, Loading } from '../components';
-import { dayName, formatDate, queryKeys } from '../lib/queryKeys';
+import { queryKeys } from '../lib/queryKeys'
+import { dayName, formatDate } from '../lib/format';
 
 export default function PlanDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -36,7 +37,7 @@ export default function PlanDetailPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 dark:text-slate-100">{plan.name}</h1>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{plan.name}</h1>
             <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700">
               {dayName(plan.day_of_week)}
             </span>
@@ -80,7 +81,7 @@ export default function PlanDetailPage() {
               .map((pe) => (
                 <li key={pe.id} className="flex items-center justify-between py-3">
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-slate-100 dark:text-slate-100">
+                    <p className="font-medium text-slate-900 dark:text-slate-100">
                       {pe.order_index + 1}. {pe.exercise?.name ?? `动作 #${pe.exercise_id}`}
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">

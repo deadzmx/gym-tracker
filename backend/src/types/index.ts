@@ -1,20 +1,10 @@
 // Shared types for the gym tracker backend.
 
-export type Category =
-  | "胸"
-  | "背"
-  | "腿"
-  | "肩"
-  | "臂"
-  | "核心"
-  | "有氧";
+export const CATEGORIES = ["胸", "背", "腿", "肩", "臂", "核心", "有氧"] as const;
+export const EQUIPMENT = ["杠铃", "哑铃", "器械", "绳索", "徒手"] as const;
 
-export type Equipment =
-  | "杠铃"
-  | "哑铃"
-  | "器械"
-  | "绳索"
-  | "徒手";
+export type Category = typeof CATEGORIES[number];
+export type Equipment = typeof EQUIPMENT[number];
 
 export interface Exercise {
   id: number;

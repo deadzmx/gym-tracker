@@ -4,11 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { sessionsApi } from '../api/sessions';
 import { Button, Card, Empty, Loading, MonthCalendar, useToast } from '../components';
 import type { MonthSession } from '../components';
-import { addMonth, buildMonth, groupSessionsByDate, monthKey } from '../lib/calendar';
+import { addMonth, buildMonth, monthKey } from '../lib/calendar';
 import { queryKeys } from '../lib/queryKeys';
+import { dayName } from '../lib/format';
 import type { WorkoutSession } from '../types';
-
-const WEEKDAY_NAMES = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 export default function CalendarPage() {
   const navigate = useNavigate();
@@ -90,8 +89,6 @@ export default function CalendarPage() {
     return s.session_date >= monthInfo.firstDate && s.session_date <= monthInfo.lastDate;
   }).length;
 
-  const sessionsByDate = useMemo(() => groupSessionsByDate(monthSessions), [monthSessions]);
-  void sessionsByDate; // currently used inside MonthCalendar; keep reference for future expansion
   return (
     <div className="space-y-4 md:space-y-6" data-testid="calendar-page">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -143,9 +140,9 @@ export default function CalendarPage() {
       </div>
 
       <div className="flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-400">
-        {WEEKDAY_NAMES.map((d) => (
+        {[0, 1, 2, 3, 4, 5, 6].map((d) => (
           <span key={d} className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-800">
-            {d}
+            {dayName(d)}
           </span>
         ))}
       </div>
