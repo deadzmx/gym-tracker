@@ -15,6 +15,7 @@ env:
 jobs:
   # ─────────────────────────────────────────────────────────
   # Build & push unified Docker image (frontend + backend)
+  # Multi-arch: linux/amd64 + linux/arm64 (M1/M2 Mac, ARM servers)
   # ─────────────────────────────────────────────────────────
   build:
     name: Build & push image
@@ -24,6 +25,9 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -49,12 +53,13 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix=sha-
 
-      - name: Build & push unified image
+      - name: Build & push unified image (multi-arch)
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           target: prod
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

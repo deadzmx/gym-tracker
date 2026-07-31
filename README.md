@@ -9,7 +9,7 @@
 [![Tests](https://img.shields.io/badge/tests-82_passing-4c1?logo=checkmarx&logoColor=white)](#-测试)
 [![E2E](https://img.shields.io/badge/E2E-Playwright-2EAD33?logo=playwright&logoColor=white)](https://playwright.dev)
 
-> 一套完整自托管的训练日志 + AI 计划推荐 + 移动响应式 + 暗色模式 + 离线缓存 + 月视图日历(可拖拽改日)的 Web 应用。Express + React 19,**单 Docker 镜像**统一部署(API + 静态文件),SQLite 持久化,零外部依赖。
+> 一套完整自托管的训练日志 + AI 计划推荐 + 移动响应式 + 暗色模式 + 离线缓存 + 月视图日历(可拖拽改日)的 Web 应用。Express + React 19,**单 Docker 镜像**统一部署(API + 静态文件),SQLite 持久化,零外部依赖。**多架构镜像**:linux/amd64 + linux/arm64(M1/M2 Mac 即开即用)。
 
 ## ✨ 功能
 
@@ -323,7 +323,7 @@ make shell        # 进入生产容器
 
 | Service | 镜像 | 端口 | 说明 |
 |---|---|---|---|
-| `app` (prod) | `ghcr.io/deadzmx/gym-tracker` | 8123 → 3001 | Express + 静态文件(单进程) |
+| `app` (prod) | `ghcr.io/deadzmx/gym-tracker` | 8123 → 3001 | Express + 静态文件(单进程),**多架构:linux/amd64 + linux/arm64** |
 
 **开发(2 容器)**:后端 3001 + 前端 5173,各带热重载。
 
