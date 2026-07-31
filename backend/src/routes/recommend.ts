@@ -70,7 +70,7 @@ router.post("/recommend", async (req: Request, res: Response, next: NextFunction
       } catch (err) {
         // LLM failed — fall through to rule engine
         // eslint-disable-next-line no-console
-        console.warn(`[recommend] LLM failed, falling back: ${(err as Error).message}`);
+        console.warn(`[recommend] LLM(${input.llm.provider}) failed, falling back: ${(err as Error).message}`);
         const ruleOut: RecommendOutput = recommendRule(input, pool, prMap);
         res.json({
           data: ruleOut,

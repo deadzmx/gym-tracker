@@ -60,6 +60,10 @@ export default function SettingsPage() {
   };
 
   const currentProviderInfo = PROVIDERS.find((p) => p.value === provider);
+  const savedKey = initial.llm?.api_key;
+  const savedProvider = initial.llm?.provider;
+  const providerMismatch =
+    savedProvider && savedProvider !== provider && savedKey && savedKey.length >= 8;
 
   return (
     <div className="space-y-4 md:space-y-6 max-w-2xl mx-auto" data-testid="settings-page">
@@ -122,6 +126,12 @@ export default function SettingsPage() {
             {apiKey && !showKey && (
               <p className="mt-1 text-xs text-slate-400" data-testid="key-mask">
                 当前: {maskKey(apiKey)}
+              </p>
+            )}
+            {providerMismatch && (
+              <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400" data-testid="provider-mismatch">
+                ⚠️ 你之前保存的是 <b>{PROVIDERS.find((p) => p.value === savedProvider)?.label}</b> 的 key,
+                但当前选择的是 <b>{currentProviderInfo?.label}</b>。点保存后再试,否则会发到错误的 LLM。
               </p>
             )}
           </div>

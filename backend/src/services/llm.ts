@@ -27,7 +27,7 @@ interface ChatResponse {
   choices: ChatChoice[];
 }
 
-const LLM_TIMEOUT_MS = 12_000;
+const LLM_TIMEOUT_MS = 45_000; // Bumped from 12s — international + DNS can be slow
 
 function classifyCategory(c: string | null): Category {
   const allowed: Category[] = ["胸", "背", "腿", "肩", "臂", "核心", "有氧"];
@@ -208,12 +208,33 @@ export async function callLlm(
     });
   } catch (err) {
     clearTimeout(timeoutId);
-    throw new Error(`LLM request failed: ${(err as Error).message}`);
+    const e = err as Error & { name?: string };
+    // Distinguish timeout from network failure from other errors
+    if (e.name === "AbortError") {
+      throw new Error(
+        `LLM request timed out after ${LLM_TIMEOUT_MS / 1000}s — 智普服务器响应太慢,可能是网络问题`,
+      );
+    }
+    throw new Error(`LLM 网络请求失败: ${e.message}`);
   }
   clearTimeout(timeoutId);
 
   if (!res.ok) {
     const text = await res.text();
+    // Common cases
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(
+        `API key 无效或过期(HTTP ${res.status}):请检查 /settings 里填的智普 key`,
+      );
+    }
+    if (res.status === 429) {
+      throw new Error(`API 调用频率超限(HTTP 429):稍后再试`);
+    }
+    if (res.status >= 500) {
+      throw new Error(
+        `智普服务器错误(HTTP ${res.status}):${text.slice(0, 200)}`,
+      );
+    }
     throw new Error(`LLM HTTP ${res.status}: ${text.slice(0, 200)}`);
   }
 
