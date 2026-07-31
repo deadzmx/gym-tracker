@@ -126,9 +126,9 @@ describe('DashboardPage', () => {
       {
         id: 1,
         name: '杠铃卧推',
-        category: 'chest',
-        equipment: 'barbell',
-        primary_muscle: 'chest',
+        category: '胸',
+        equipment: '杠铃',
+        primary_muscle: '胸',
         description: null,
         created_at: '2024-01-01T00:00:00.000Z',
       },

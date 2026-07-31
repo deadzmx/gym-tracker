@@ -102,8 +102,8 @@ describe('exercisesApi', () => {
       {
         id: 1,
         name: 'Bench Press',
-        category: 'chest',
-        equipment: 'barbell',
+        category: '胸',
+        equipment: '杠铃',
         primary_muscle: 'pectoralis',
         description: 'desc',
         created_at: '2024-01-01T00:00:00.000Z',
@@ -117,8 +117,8 @@ describe('exercisesApi', () => {
 
   it('list({ category }) forwards query params', async () => {
     axiosMock.get.mockResolvedValue({ data: [] });
-    await exercisesApi.list({ category: 'chest' });
-    expect(axiosMock.get).toHaveBeenCalledWith('/exercises', { params: { category: 'chest' } });
+    await exercisesApi.list({ category: '胸' });
+    expect(axiosMock.get).toHaveBeenCalledWith('/exercises', { params: { category: '胸' } });
   });
 
   it('get() rejects with ApiClientError on 404', async () => {
