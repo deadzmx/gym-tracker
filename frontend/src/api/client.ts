@@ -1,9 +1,15 @@
 import axios, { AxiosError, type AxiosInstance } from 'axios';
 import type { ApiError } from '../types';
 
+// Default to a relative `/api` path so the frontend talks to whatever origin
+// it was served from (works behind any reverse proxy, any host port, http or https).
+// In dev with `docker-compose.dev.yml`, the frontend container sets
+//   VITE_API_BASE=http://localhost:3001
+// so the request goes cross-origin to the backend container.
+// In the unified production image the SPA + API share the same Express process,
+// so the default relative path is exactly what we want.
 const BASE_URL =
-  (import.meta.env.VITE_API_BASE as string | undefined) ??
-  'http://localhost:3001/api';
+  (import.meta.env.VITE_API_BASE as string | undefined) ?? '/api';
 
 export class ApiClientError extends Error {
   status: number;

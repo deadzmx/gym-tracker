@@ -88,7 +88,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
       <div className="border-t border-slate-100 dark:border-slate-800 p-4 text-xs text-slate-400 dark:text-slate-500 hidden md:block">
         <p>设计:design.md</p>
-        <p>API:{import.meta.env.VITE_API_BASE ?? 'http://localhost:3001/api'}</p>
+        <p>API:{import.meta.env.VITE_API_BASE ?? '/api (同源)'}</p>
       </div>
     </>
   );
